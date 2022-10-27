@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>Hexo-Github部署自己的个人网站</title>
-    <url>/2022/10/27/How-to-post-a-blog/</url>
+    <url>/2022/10/27/How-to-post-a-blogr/</url>
     <content><![CDATA[<p>write something</p>
 ]]></content>
       <categories>
@@ -102,7 +102,7 @@
 <p>因此设置 IP 地址的方式可以是 sockaddr_in.sin_addr.s_addr &#x3D; inet_addr(“127.0.0.1”)，这样设置的话就是说 server 只接受本机进程连接。有个 macro INADDR_LOOPBACK 是”127.0.0.1”的二进制表示</p>
 <p>另外还有个特殊的 IP 0.0.0.0, 表示 server 接受整个互联网的 IP 地址。设置 sockaddr_in.sin_addr.s_addr &#x3D; inet_addr(“0.0.0.0”)即可接受全部 IP 地址的连接请求。</p>
 <p>这两个地址比较常用，所以有它们对应的 macro 定义。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Address to accept any incoming messages.  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	INADDR_ANY		((in_addr_t) 0x00000000)</span></span><br><span class="line"><span class="comment">/* Address to send to all hosts.  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	INADDR_BROADCAST	((in_addr_t) 0xffffffff)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Address to accept any incoming messages.  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	INADDR_ANY		((in_addr_t) 0x00000000)</span></span><br><span class="line"><span class="comment">/* Address to loopback in software to local host.  */</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> INADDR_LOOPBACK	((in_addr_t) 0x7f000001) <span class="comment">/* Inet 127.0.0.1.  */</span></span></span><br></pre></td></tr></table></figure>
 
 <p>宏定义是本机（host）的二进制格式，需要转 network byte order，又由于 IPv4 是 32 位的，转换 API 即为 htonl()。于是 inet_addr(“127.0.0.1”&#x2F;“0.0.0.0”)也等价于 htonl(INADDR_LOOPBACK&#x2F;INADDR_ANY)。</p>
 </li>
