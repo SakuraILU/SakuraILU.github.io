@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="背景遇到个比赛，比赛方提供了 C++代码，但是想用 Python 来弄强化学习，之前试了试 ctypes…学了之后才发现 Python 需要的是一个独立的进程而不是函数调用。想起来比设用的 Carla，似乎需要一个 Server 和 Client 的架构。目前的一个想法是 C++和 Python 之间的进程通讯，C++侧只能在算法里面做些设计，琢磨着应该是 init 和 step 里面加一些通讯的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Socekt">
+<meta property="og:url" content="http://example.com/2022/10/27/Socekt/index.html">
+<meta property="og:site_name" content="Sakura">
+<meta property="og:description" content="背景遇到个比赛，比赛方提供了 C++代码，但是想用 Python 来弄强化学习，之前试了试 ctypes…学了之后才发现 Python 需要的是一个独立的进程而不是函数调用。想起来比设用的 Carla，似乎需要一个 Server 和 Client 的架构。目前的一个想法是 C++和 Python 之间的进程通讯，C++侧只能在算法里面做些设计，琢磨着应该是 init 和 step 里面加一些通讯的">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-10-27T14:49:36.000Z">
+<meta property="article:modified_time" content="2022-10-27T15:25:35.461Z">
+<meta property="article:author" content="Sakura">
+<meta property="article:tag" content="C">
+<meta property="article:tag" content="Socekt">
+<meta property="article:tag" content="Computer Network">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2022/10/27/Socekt/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Socekt | Sakura</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Sakura</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Keep It Simple, Stupid</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/SakuraILU" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/27/Socekt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/keqing.jpg">
+      <meta itemprop="name" content="Sakura">
+      <meta itemprop="description" content="日复一日，必有精进">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Sakura">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Socekt
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-10-27 22:49:36 / Modified: 23:25:35" itemprop="dateCreated datePublished" datetime="2022-10-27T22:49:36+08:00">2022-10-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Network/" itemprop="url" rel="index"><span itemprop="name">Computer_Network</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>17k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>15 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>遇到个比赛，比赛方提供了 C++代码，但是想用 Python 来弄强化学习，之前试了试 ctypes…学了之后才发现 Python 需要的是一个独立的进程而不是函数调用。想起来比设用的 Carla，似乎需要一个 Server 和 Client 的架构。目前的一个想法是 C++和 Python 之间的进程通讯，C++侧只能在算法里面做些设计，琢磨着应该是 init 和 step 里面加一些通讯的东西，这样的话应该是 1v1 的结构。<br>总之先看看 C++和 Py 通讯的 socket API 怎么弄吧，之前还没用过，只云过中科大的计网课 hh</p>
+<span id="more"></span>
+<h2 id="C-Server-Socket"><a href="#C-Server-Socket" class="headerlink" title="C++ Server Socket"></a>C++ Server Socket</h2><p>建立基本上服务器的 Socket 的主要流程是：</p>
+<ol>
+<li>给进程建立一个用于网络通讯的 Socket（返回这个 Socket 的文件描述符）。既然 Unix 世界里 Everything is a file，Socekt 就是一个文件，进程读写 Socket 就是写入网络设备和读入网络设备咯。</li>
+<li>绑定 IP:Port。请求网卡设置这个 Socekt 的端口索引为 PORT，IP 是本机就不需要设置啦（bind API 里的 IP 地址是指该 socket 允许接受的连接进程地址，其他 IP 来的请求就请网卡忽视掉），由网卡读写这个 Socket，与互联网进行交流。</li>
+<li>向网卡设置 Sokect 为监听 Socket。一般服务器需要不断监听外部连接请求，所以要有一个专门做为监听口。每当 listen 到请求连接队列里有某个 Client 的连接请求后会 accept 并重新分配一个 Port 用于 Server 和这个 Client 的专门的通讯（返回这个 Socket 的文件描述符），而监听 Socekt 继续 listen 请求连接的队列。当然得到了对方的 IP：PORT，如果想拒绝连接的话 close 掉新创建的连接 socket 即可。</li>
+<li>服务器通过新开的通讯 Socket 与 Client 交流。因为 Socket 被抽象成文件，用 read 和 write API 读写就好。</li>
+<li>关闭 Socekt。同样，因为是文件，用 close 关闭 Socket 的描述符就好。</li>
+</ol>
+<p>个人理解的抽象结构。准备之后做一下 CS144 的 Lab，深入理解一下。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">| listen socket |       |communicate socket|       (can generate other communicate sockets)</span><br><span class="line">        ^                   |          ^</span><br><span class="line">        |                   |          |</span><br><span class="line"> |      |        |    |     v          |         |</span><br><span class="line"> |  | 请求队列 |  |    | |写缓冲区|   |读缓冲区|   |</span><br><span class="line"> |      ^        |    |     |          ^         |</span><br><span class="line">        |                   v          |</span><br><span class="line">SRC  IP：PORT              SRC   IP:PORT</span><br><span class="line">DST  NONE: NONE            DST   IP:PORT</span><br><span class="line">| ----------------网卡 -------------------- |</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="创建-SOCKET"><a href="#创建-SOCKET" class="headerlink" title="创建 SOCKET"></a>创建 SOCKET</h3><p>man 一下 socket，得到函数的 prototype</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span>          <span class="comment">/* See NOTES */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">socket</span><span class="params">(<span class="type">int</span> domain, <span class="type">int</span> type, <span class="type">int</span> protocol)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>domain 的话，手册上写了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">The domain argument specifies a communication domain;  this  selects  the</span><br><span class="line">protocol family which will be used for communication.  These families are</span><br><span class="line">defined in &lt;sys/socket.h&gt;.  The formats currently understood by the Linux</span><br><span class="line">kernel include:</span><br><span class="line"></span><br><span class="line">Name         Purpose                                    Man page</span><br><span class="line">AF_UNIX      Local communication                        unix(7)</span><br><span class="line">AF_LOCAL     Synonym for AF_UNIX</span><br><span class="line">AF_INET      IPv4 Internet protocols                    ip(7)</span><br></pre></td></tr></table></figure>
+
+<p>macro 定义在头文件&lt;sys&#x2F;socket.h&gt;里面的。可以看到用 IPV4 网络层通讯协议的话需要传入宏 AF_INET。本机通讯的话 ip 地址设置成 127.0.0.1 就 ok 了，IPV4 也是可以应用的。头两个倒是看起来专门用于 local communicate 的，以后再了解吧。</p>
+<p>type 的话，有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">The  socket has the indicated type, which specifies the communication se‐</span><br><span class="line">mantics.  Currently defined types are:</span><br><span class="line"></span><br><span class="line">SOCK_STREAM     Provides sequenced, reliable,  two-way,  connection-based</span><br><span class="line">                byte streams.  An out-of-band data transmission mechanism</span><br><span class="line">                may be supported.</span><br><span class="line"></span><br><span class="line">SOCK_DGRAM      Supports datagrams (connectionless,  unreliable  messages</span><br><span class="line">                of a fixed maximum length).</span><br></pre></td></tr></table></figure>
+
+<p>SOCK_STREAM 是面向连接的可靠通讯（可能是 TCP），SOCK_DGRAM 是无连接的不可靠通讯（可能是 UDP）。</p>
+<p>看起来这个就已经设置好了通讯方式，protocal 里面的 TCP 和 UDP 这些似乎可以不设置了？后面跟着有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Normally only a single protocol exists to  support  a  particular  socket</span><br><span class="line">type within a given protocol family, in which case protocol can be speci‐</span><br><span class="line">fied as 0.</span><br></pre></td></tr></table></figure>
+
+<p>看起来的确如此，传入 0 就可以了。</p>
+<p>因此需要传入的就是网络层协议 domain 和传输层协议 type。可通过如下调用创建基于 IPV4&#x2F;TCP 连接的 SOCKET 并得到 socket 的文件描述符</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> sfd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>); <span class="comment">//sfd short for server file descriptor</span></span><br><span class="line"><span class="keyword">if</span>(sfd &lt; <span class="number">0</span>)</span><br><span class="line">    panic(<span class="string">&quot;fail to create TCP/IPV4 socket...\n&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="绑定-IP：PORT"><a href="#绑定-IP：PORT" class="headerlink" title="绑定 IP：PORT"></a>绑定 IP：PORT</h3><p>man 一下 bind，protocol 是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SYNOPSIS</span><br><span class="line">       #include &lt;sys/types.h&gt;          /* See NOTES */</span><br><span class="line">       #include &lt;sys/socket.h&gt;</span><br><span class="line"></span><br><span class="line">       int bind(int sockfd, const struct sockaddr *addr,</span><br><span class="line">                socklen_t addrlen);</span><br></pre></td></tr></table></figure>
+
+<p>sockfd 就是我们得到的 sfd, addr 似乎是存地址的结构体，addrlen 就是地址结构体的长度吧。<br>后面跟着一段</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">When  a  socket is created with socket(2), it exists in a name space (ad‐</span><br><span class="line">dress family) but has no address assigned to it.  bind() assigns the  ad‐</span><br><span class="line">dress  specified by addr to the socket referred to by the file descriptor</span><br><span class="line">sockfd.  addrlen specifies the size, in bytes, of the  address  structure</span><br><span class="line">pointed to by addr.  Traditionally, this operation is called “assigning a</span><br><span class="line">name to a socket”.</span><br><span class="line"></span><br><span class="line">It is normally necessary to assign a local address using bind() before  a</span><br><span class="line">SOCK_STREAM socket may receive connections (see accept(2)).</span><br></pre></td></tr></table></figure>
+
+<p>这里基本上也说完了创建 socket 的整个流程：</p>
+<ol>
+<li>create socket by socket()</li>
+<li>assign adress to the socket by bind()</li>
+<li>accept connections by accept()</li>
+<li>receive connections. 这时以及以后都是常规 read、write、close 了，和本机读写设备一样</li>
+</ol>
+<p><u>可以发现，尽管手册虽然比较冗长，不过毕竟是第一手资料，适当 search 一下手册还是能看到很多好东西的。</u></p>
+<p>然后又告诉了我们一个很关键的东西</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">The  rules  used  in name binding vary between address families.  Consult</span><br><span class="line">the manual entries in Section 7 for detailed information.   For  AF_INET,</span><br><span class="line">see  ip(7);  for  AF_INET6,  see  ipv6(7);  for AF_UNIX, see unix(7); for</span><br><span class="line">AF_APPLETALK, see ddp(7); for AF_PACKET, see packet(7); for  AF_X25,  see</span><br><span class="line">x25(7); and for AF_NETLINK, see netlink(7).</span><br></pre></td></tr></table></figure>
+
+<p>所以基于不同网络层的 socket 对应要 bind 的 address 结构都不大一样。对于 IPV4 的 AF_INET 而言，man 7 ip 查看到了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">protocol  is  the  IP  protocol  in the IP header to be received or sent.</span><br><span class="line">Valid values for protocol include:</span><br><span class="line"></span><br><span class="line">• 0 and IPPROTO_TCP for tcp(7) stream sockets;</span><br><span class="line"></span><br><span class="line">• 0 and IPPROTO_UDP for udp(7) datagram sockets;</span><br><span class="line"></span><br><span class="line">• IPPROTO_SCTP for sctp(7) stream sockets; and</span><br><span class="line"></span><br><span class="line">• IPPROTO_UDPLITE for udplite(7) datagram sockets.</span><br></pre></td></tr></table></figure>
+
+<p>ok，的确和之前猜的一样，socket()函数的 protocol 参数设置为 0 的话使用默认的常用传输层协议，TCP 和 UDP 这两个。后面两个不知道是啥玩意儿。。。</p>
+<p>后面很快找到了两个 bind 需要的结构体</p>
+<p id="in_addr"></p>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">struct sockaddr_in &#123;</span><br><span class="line">    sa_family_t    sin_family; /* address family: AF_INET */</span><br><span class="line">    in_port_t      sin_port;   /* port in network byte order */</span><br><span class="line">    struct in_addr sin_addr;   /* internet address */</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">/* Internet address. */</span><br><span class="line">struct in_addr &#123;</span><br><span class="line">    uint32_t       s_addr;     /* address in network byte order */</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>需要设置的有协议类型、服务器端口和服务器接受的端口地址:</p>
+<ol>
+<li><p>sin_family：注释里已经说明了必须是 AF_INET…我们正好也是在找 AF_INET&#x2F;SOCKET_STREAM 需要 bind 的地址类型嘛。man page 跟着有描述</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sin_family is always set to AF_INET.</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>sin_port：手册里有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sin_port contains the port in network byte order. The port numbers below</span><br><span class="line">1024 are called privileged ports (or sometimes: reserved ports). Only a</span><br><span class="line">privileged process (on Linux: a process that has the CAP_NET_BIND_SERVICE</span><br><span class="line">capability in the user namespace governing its network namespace) may</span><br><span class="line">bind(2) to these sockets.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>大概介绍了 sin_port 中需要设置的是 network byte order 的端口号。以及 1024 以内的是系统级的端口，后面的才是用户级端口，可以被用户进程使用并 bind（）IP：PORT。现在的问题是 network byte order 是啥？手册上面没提到，<a href="://www.tutorialspoint.com/unix_sockets/network_byte_orders.htm">STFW 一下</a>。大概是说有些机器是大端字节表示，而有些是小端的。为了统一所有机器的网络传输，规定全部采用 network byte order（就是大端表示法，不知道是不是什么历史包袱，感觉小端感觉更合适吧，用的更多而且阅读二进制序列都更好读一些）。<br>所谓小端的话就是数据的低字节放在低地址处，而大端就是数据的高字节放在地地址处，刚好按字节颠倒一下。<br>个人电脑应该基本上都是小端序吧，readelf -h somefile.out 就可以看到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00</span><br><span class="line">Class:                             ELF64</span><br><span class="line">Data:                              2&#x27;s complement, little endian</span><br><span class="line">******</span><br></pre></td></tr></table></figure>
+
+<p>网站教程提到了可以采用如下 API 进行本机（host）和网络（network）二进制序列之间的转换</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Function        	Description</span><br><span class="line">htons()	        Host to Network Short</span><br><span class="line">htonl()	        Host to Network Long</span><br><span class="line">ntohl()	        Network to Host Long</span><br><span class="line">ntohs()	        Network to Host Short</span><br></pre></td></tr></table></figure>
+
+<p>又知道 IP 是 32 位(long)、端口是 16 位（short），设置端口是 sockaddr_in.sin_port &#x3D; htons(12000)。</p>
+</li>
+<li><p>sin_addr：sin_addr 是个结构体，是指 server 所接受的 IP 地址！！！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sin_addr is the IP host address.  The s_addr  member  of  struct  in_addr</span><br><span class="line">contains  the  host  interface  address  in  network byte order.  in_addr</span><br><span class="line">should be assigned one of the INADDR_* values (e.g., INADDR_LOOPBACK) us‐</span><br><span class="line">ing    htonl(3)    or   set   using   the   inet_aton(3),   inet_addr(3),</span><br><span class="line">inet_makeaddr(3) library functions or directly  with  the  name  resolver</span><br><span class="line">(see gethostbyname(3)).</span><br></pre></td></tr></table></figure>
+
+<p>sin_addr 是个结构体，<a href="#in_addr">上文有提到</a>，但是其实里面只有一个 member，s_addr…有点奇怪的设计。IP 地址存在 sin_addr.s_addr 里面，同样是 network byte order。里面提到了转换用的几个 API。<br>大概也能推测出转换过程是十点表示法-&gt;二进制小端序列-&gt;二进制大端序<br>127.0.0.1 -&gt; 0x7F|00|00|01 (0b01111111|00000000|00000000|00000001) -&gt; 0x01|00|00|7F<br>man 了一下，里面 inet_addr 是最方便的，能够帮我们从十点表示法字符串（如”127.0.0.1”）直接转成 network ordered byte，也比较符合我的使用习惯。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SYNOPSIS</span><br><span class="line">    #include &lt;sys/socket.h&gt;</span><br><span class="line">    #include &lt;netinet/in.h&gt;</span><br><span class="line">    #include &lt;arpa/inet.h&gt;</span><br><span class="line"></span><br><span class="line">    in_addr_t inet_addr(const char *cp);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>手册上后面还提到了支持 a、a.b、a.b.c、a.b.c.d 四种格式<br>也就是可以接受</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">A类网络地址集合：a.any.any.any</span><br><span class="line">B类网络地址集合：a.b.any.any</span><br><span class="line">C类网络地址集合: a.b.c.any</span><br><span class="line">单个网络地址： a.b.c.d</span><br></pre></td></tr></table></figure>
+
+<p>因此设置 IP 地址的方式可以是 sockaddr_in.sin_addr.s_addr &#x3D; inet_addr(“127.0.0.1”)，这样设置的话就是说 server 只接受本机进程连接。有个 macro INADDR_LOOPBACK 是”127.0.0.1”的二进制表示</p>
+<p>另外还有个特殊的 IP 0.0.0.0, 表示 server 接受整个互联网的 IP 地址。设置 sockaddr_in.sin_addr.s_addr &#x3D; inet_addr(“0.0.0.0”)即可接受全部 IP 地址的连接请求。</p>
+<p>这两个地址比较常用，所以有它们对应的 macro 定义。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Address to accept any incoming messages.  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	INADDR_ANY		((in_addr_t) 0x00000000)</span></span><br><span class="line"><span class="comment">/* Address to send to all hosts.  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	INADDR_BROADCAST	((in_addr_t) 0xffffffff)</span></span><br></pre></td></tr></table></figure>
+
+<p>宏定义是本机（host）的二进制格式，需要转 network byte order，又由于 IPv4 是 32 位的，转换 API 即为 htonl()。于是 inet_addr(“127.0.0.1”&#x2F;“0.0.0.0”)也等价于 htonl(INADDR_LOOPBACK&#x2F;INADDR_ANY)。</p>
+</li>
+</ol>
+<p>总结起来，bind IP：PORT 为 127.0.0.1:12000 的方式是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> PORT (12000)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IP <span class="string">&quot;127.0.0.1&quot;</span></span></span><br><span class="line"><span class="comment">//alloc socket adress strcture for AF_INET</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">s_addr</span>;</span></span><br><span class="line"><span class="comment">//clear all rubbish data in s_addr</span></span><br><span class="line"><span class="built_in">memset</span>(&amp;s_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(s_addr));</span><br><span class="line"><span class="comment">//set IP and PORT</span></span><br><span class="line">s_addr.sin_family = AF_INET;</span><br><span class="line">s_addr.sin_port = htons(PORT);</span><br><span class="line">s_addr.sin_addr.s_addr = inet_addr(IP);</span><br><span class="line"><span class="comment">//bind adress to the socket</span></span><br><span class="line"><span class="keyword">if</span>(bind(sfd, (<span class="keyword">struct</span> sockaddr *)&amp;s_addr, <span class="keyword">sizeof</span>(s_addr)) &lt; <span class="number">0</span>)</span><br><span class="line">    panic(<span class="string">&quot;fail to bind socket to (%s, %d)...\n&quot;</span>, IP, PORT);</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置-Socket-为监听-Socket"><a href="#设置-Socket-为监听-Socket" class="headerlink" title="设置 Socket 为监听 Socket"></a>设置 Socket 为监听 Socket</h3><p>服务器一般需要一个端口不断监听请求队列，所以把创建的这个 socket 设置为监听 socket，网卡收到的对这个端口的连接请求都往这个 socket 里面写。man 一下 listen 的手册。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SYNOPSIS</span><br><span class="line">#include &lt;sys/types.h&gt;          /* See NOTES */</span><br><span class="line">#include &lt;sys/socket.h&gt;</span><br><span class="line"></span><br><span class="line">int listen(int sockfd, int backlog);</span><br></pre></td></tr></table></figure>
+
+<p>依然是这两个头文件 o(<em>^▽^</em>)o 。第一个肯定是需要设置为监听 socket 的文件描述符，第二个的参数的话，手册写的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">The backlog argument defines the maximum length to  which  the  queue  of</span><br><span class="line">pending connections for sockfd may grow. If a connection request arrives</span><br><span class="line">when the queue is full, the client may receive an error with  an  indica‐</span><br><span class="line">tion  of ECONNREFUSED ******</span><br></pre></td></tr></table></figure>
+
+<p>就是连接请求队列的最大长度，队列溢出的话回网卡会发回 Client 一个 ECONNREFUSED 的错误表示。</p>
+<p>例如我们只需要一个 1v1 的服务器-客户端，可以设置</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> QUEST_LEN (1)</span></span><br><span class="line"><span class="keyword">if</span>(listen(sfd, QUEST_LEN) &lt; <span class="number">0</span>)</span><br><span class="line">    panic(<span class="string">&quot;fail to set socket to listen socket...\n&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="Socket-监听连接请求"><a href="#Socket-监听连接请求" class="headerlink" title="Socket 监听连接请求"></a>Socket 监听连接请求</h3><p>采用 accept API 监听并接受 Client 的连接</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SYNOPSIS</span><br><span class="line">#include &lt;sys/types.h&gt;          /* See NOTES */</span><br><span class="line">#include &lt;sys/socket.h&gt;</span><br><span class="line"></span><br><span class="line">int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);</span><br></pre></td></tr></table></figure>
+
+<p>第一个肯定是监听 socket 的文件描述符，第二个第三个分别是连接对象的 adress 结构体以及它的长度。<br><u>需要注意第三个参数 addr_len 是指针传递，而且必须传它，否则会 accept 失败（试了试，直接传 0 的话遇到 Client 请求然后建立连接时，居然返回-1）。。。</u><br>所以基本使用方式为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">c_addr</span>;</span></span><br><span class="line"><span class="type">socklen_t</span> c_addr_size = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in);</span><br><span class="line">cfd = accept(sfd, (<span class="keyword">struct</span> sockaddr *)&amp;c_addr, &amp;c_addr_size);</span><br><span class="line"><span class="keyword">if</span>(cfd &lt; <span class="number">0</span>)</span><br><span class="line">    panic(<span class="string">&quot;fail to accept...\n&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>返回的 cfd 正是新创建的 server-client 链接 socket。<br>cfd 的端口当然是随机分配的咯，毕竟是 1v1 连接的 socket，server 和 client 的用户代码里都不需要知道彼此的 Port，只要有 Socket 文件描述符就行。</p>
+<h3 id="关于-sockaddr-参数"><a href="#关于-sockaddr-参数" class="headerlink" title="关于 sockaddr 参数"></a>关于 sockaddr 参数</h3><p>在 bind 手册后面紧跟着有这样一段话，之前没有截取出来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">The  actual structure passed for the addr argument will depend on the ad‐</span><br><span class="line">dress family.  The sockaddr structure is defined as something like:</span><br><span class="line"></span><br><span class="line">struct sockaddr &#123;</span><br><span class="line">    sa_family_t sa_family;</span><br><span class="line">    char        sa_data[14];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">The only purpose of this structure  is  to  cast  the  structure  pointer</span><br><span class="line">passed in addr in order to avoid compiler warnings.  See EXAMPLES below.</span><br></pre></td></tr></table></figure>
+
+<p>提醒了我们传参时需要将我们协议对应的的 addr 结构体（例如我们 AF_INET 对应的 sockaddr_in）强制类型转换成 struct sockaddr 以为了避免编译警告。</p>
+<p>因为不同协议对于的地址参数结构不同，需要统一一下函数参数，最简单的当然是 void*。由于每种地址结构体第一个 member 都是 sa_family_t，只要知道这个的值就知道结构体。所以用 sockaddr 强转一下，然后就可以读 sa_family_t 的值了（实际上直接强转成 sa_family_t 都行感觉。。。毕竟 C 语言，过于灵活，不知道他们库函数设计的真正考量），再根据其值强转成对应的结构体。很容易想到一个朴素的处理方式</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr</span> *<span class="title">p</span> =</span> addr;</span><br><span class="line"><span class="keyword">switch</span>(p-&gt;<span class="type">sa_family_t</span>)&#123;</span><br><span class="line">    <span class="keyword">case</span> AF_INET:</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> *<span class="title">p_addr</span> =</span> addr;</span><br><span class="line">        <span class="comment">//code: deal with IPV4</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AF_INET6:</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in6</span> *<span class="title">p_addr</span> =</span> addr;</span><br><span class="line">        <span class="comment">//code: deal with IPV6</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> AF_UNIX:</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_un</span> *<span class="title">p_addr</span> =</span> addr;</span><br><span class="line">        <span class="comment">//code: deal with UNIX/LOCAL</span></span><br><span class="line">    ******</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="comment">//code</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>强转 sockaddr 解析协议类型的代码明明可以放在函数里面完成，可以让用户使用起来更方便，但是设计者却把这个工作交给了用户，不太明白具体的设计考量，不过也只能遵循这个 API 设计了，在 socket()和 accept()中需要注意这点。</p>
+<p>总之这就是为啥明明使用的是 sockaddr_in，但是传的时候却需要强转 sockaddr，毕竟还有各种各样其他的协议地址结构，需要统一 API。</p>
+<h3 id="关于-IP：PORT"><a href="#关于-IP：PORT" class="headerlink" title="关于 IP：PORT"></a>关于 IP：PORT</h3><p>Server 和 Client 要交流肯定需要约定一个大家都知道的地址，这就是负责监听连接请求的监听 Socket 的地址（服务器所在公有 IP 地址和域名当然问运营商要的，但是 PORT 这个端口索引是自己设置）。<br>建立连接请求后，server 的 TCP 层直接任意新建一个 Socket 然后和 Client 的地址绑定起来，两者交流时</p>
+<ol>
+<li>Server 的读写都通过这个 Socekt 进行，用户无需知道彼此的 IP：PORT;</li>
+<li>Client 读写自己建立的这个连接 Socekt 即可，也不需要知道彼此的 IP：PORT</li>
+</ol>
+<p>因此，只有 listen socket 才需要 bind IP：PORT。</p>
+<h3 id="总结：C-x2F-C-Socket-server-代码框架"><a href="#总结：C-x2F-C-Socket-server-代码框架" class="headerlink" title="总结：C&#x2F;C++ Socket server 代码框架"></a>总结：C&#x2F;C++ Socket server 代码框架</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IN_LOOPBACK <span class="string">&quot;127.0.0.1&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PORT (12000)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> REQUEST_LEN (1)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> panic(format, ...)             \</span></span><br><span class="line"><span class="meta">    do                                 \</span></span><br><span class="line"><span class="meta">    &#123;                                  \</span></span><br><span class="line"><span class="meta">        printf(format, ##__VA_ARGS__); \</span></span><br><span class="line"><span class="meta">        assert(0);                     \</span></span><br><span class="line"><span class="meta">    &#125; while (0)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> sfd, cfd;</span><br><span class="line">    sfd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (sfd &lt; <span class="number">0</span>)</span><br><span class="line">        panic(<span class="string">&quot;fail to establish the server socket...\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">s_addr</span>, <span class="title">c_addr</span>;</span></span><br><span class="line">    <span class="built_in">memset</span>(&amp;s_addr, <span class="number">0</span>, <span class="keyword">sizeof</span>(s_addr));</span><br><span class="line">    s_addr.sin_family = AF_INET;</span><br><span class="line">    s_addr.sin_port = htons(PORT);</span><br><span class="line">    s_addr.sin_addr.s_addr = inet_addr(IN_LOOPBACK);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (bind(sfd, (<span class="keyword">struct</span> sockaddr *)&amp;s_addr, <span class="keyword">sizeof</span>(s_addr)) &lt; <span class="number">0</span>)</span><br><span class="line">        panic(<span class="string">&quot;fail to bind socket to (%s, %d)...\n&quot;</span>, IP, PORT);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(listen(sfd, REQUEST_LEN) &lt; <span class="number">0</span>)</span><br><span class="line">        panic(<span class="string">&quot;fail to set socket to listen socket...\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">socklen_t</span> c_addr_size = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in);</span><br><span class="line">    cfd = accept(sfd, (<span class="keyword">struct</span> sockaddr *)&amp;c_addr, &amp;c_addr_size);</span><br><span class="line">    <span class="keyword">if</span> (cfd == <span class="number">-1</span>)</span><br><span class="line">        panic(<span class="string">&quot;fail to accept...\n&quot;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//....</span></span><br><span class="line">    <span class="comment">//write your server code</span></span><br><span class="line">    <span class="comment">//  use read and write API to communicate with client...</span></span><br><span class="line">    <span class="comment">//....</span></span><br><span class="line"></span><br><span class="line">    close(sfd);</span><br><span class="line">    close(cfd);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="C-Client-Socket"><a href="#C-Client-Socket" class="headerlink" title="C++ Client Socket"></a>C++ Client Socket</h2><p>客户端基本流程是</p>
+<ol>
+<li>创建 socket</li>
+<li>直接 connect 想连接的服务器服务器，connect API 会随机分配一个合适的 Port 给 Client。</li>
+<li>使用文件 API read&#x2F;write 和服务器交流</li>
+<li>使用文件 API close API 关闭和服务器连接用的 Socket。</li>
+</ol>
+<p>比 Server 简单多了，使用到的 API 只有一个 connect 是新的</p>
+<h3 id="Connect-Server"><a href="#Connect-Server" class="headerlink" title="Connect Server"></a>Connect Server</h3><p>有了之前的一些经验，C socket 的套路还是清楚了很多，man 手册看到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SYNOPSIS</span><br><span class="line">       #include &lt;sys/types.h&gt;          /* See NOTES */</span><br><span class="line">       #include &lt;sys/socket.h&gt;</span><br><span class="line"></span><br><span class="line">       int connect(int sockfd, const struct sockaddr *addr,</span><br><span class="line">                   socklen_t addrlen);</span><br></pre></td></tr></table></figure>
+
+<p>根据 API 功能（让客户端创建的 socket 文件描述符连接到某个 IP：PORT 处的服务器进程）进行猜测，sockfd 是客户端创建的连接 socket 的文件描述符，addr 是申请连接服务器的地址，addrlen 则是 addr 结构体的长度。</p>
+<p>但是注意一下这里面的 addr 与 server 侧的 bind 函数的 addr 区别</p>
+<ol>
+<li>bind 里的 addr 中的 s_addr 是指服务器接受的请求连接进程的 IP 地址;</li>
+<li>connect 里的 addr 中的 s_addr 是指申请连接的服务器的 IP 地址。<br>所谓的一个 API 复用吧，不愧是底层语言，C 的设计实在是可谓寸土寸金啊。</li>
+</ol>
+<p>所以申请连接的方式是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INTVAL 3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (connect(cfd, (<span class="keyword">struct</span> sockaddr *)&amp;sock_addr, <span class="keyword">sizeof</span>(sock_addr)) &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (errno == ECONNREFUSED)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;fail to connect to %s, %d, wait 3s to reconnect...\n&quot;</span>, IP, PORT);</span><br><span class="line">            sleep(INTVAL);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            panic(<span class="string">&quot;fail to connect to %s, %d, and reconnect is helpless...\n&quot;</span>, IP, PORT);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是由于 EAFNOSUPPORT(The passed address didn’t have the correct address family in its<br>sa_family field)导致连接失败，隔 3s 再重新申请一次连接，直到连接申请成功，其他原因则把进程直接 panic 掉。</p>
+<h3 id="总结：C-x2F-C-Socket-Client-代码框架"><a href="#总结：C-x2F-C-Socket-Client-代码框架" class="headerlink" title="总结：C&#x2F;C++ Socket Client 代码框架"></a>总结：C&#x2F;C++ Socket Client 代码框架</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PORT (12000)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IP <span class="string">&quot;127.0.0.1&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> panic(format, ...)             \</span></span><br><span class="line"><span class="meta">    do                                 \</span></span><br><span class="line"><span class="meta">    &#123;                                  \</span></span><br><span class="line"><span class="meta">        printf(format, ##__VA_ARGS__); \</span></span><br><span class="line"><span class="meta">        assert(0);                     \</span></span><br><span class="line"><span class="meta">    &#125; while (0)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> cfd = <span class="number">0</span>;</span><br><span class="line">    cfd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (sfd &lt; <span class="number">0</span>)</span><br><span class="line">        panic(<span class="string">&quot;fail to establish the server socket...\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">sock_addr</span>;</span></span><br><span class="line">    sock_addr.sin_family = AF_INET;</span><br><span class="line">    sock_addr.sin_port = htons(PORT);</span><br><span class="line">    sock_addr.sin_addr.s_addr = inet_addr(IP);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (connect(cfd, (<span class="keyword">struct</span> sockaddr *)&amp;sock_addr, <span class="keyword">sizeof</span>(sock_addr)) &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (errno == ECONNREFUSED)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;fail to connect to %s, %d, wait 3s to reconnect...\n&quot;</span>, IP, PORT);</span><br><span class="line">            sleep(<span class="number">3</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            panic(<span class="string">&quot;fail to connect to %s, %d, and reconnect is helpless...\n&quot;</span>, IP, PORT);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//....</span></span><br><span class="line">    <span class="comment">//write your server code</span></span><br><span class="line">    <span class="comment">//  use read and write API to communicate with client...</span></span><br><span class="line">    <span class="comment">//....</span></span><br><span class="line"></span><br><span class="line">    close(cfd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Python-server-Socket"><a href="#Python-server-Socket" class="headerlink" title="Python server Socket"></a>Python server Socket</h2><p>Python 的 API 经过了高度封装，socket 模块也不例外，比起 C 而言简单太多。之前会用 C 的了，Python 的就很容易上手啦。<br>Python 有个 socket 模块，使用起来非常简单</p>
+<h3 id="Python-Socket-Server-框架"><a href="#Python-Socket-Server-框架" class="headerlink" title="Python Socket Server 框架"></a>Python Socket Server 框架</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack, pack</span><br><span class="line"></span><br><span class="line">addr = (<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">11999</span>)</span><br><span class="line"></span><br><span class="line">sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM, <span class="number">0</span>)</span><br><span class="line">sk.bind(addr)</span><br><span class="line">sk.listen(<span class="number">1</span>)</span><br><span class="line">csk, c_addr = sk.accept()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Write your code here</span></span><br><span class="line"><span class="comment"># use two API to communicate:</span></span><br><span class="line"><span class="comment">#     1.csk.sendall(msg) to send msg</span></span><br><span class="line"><span class="comment">#     2.msg = csk.recv(max_bytes) to receive msg</span></span><br><span class="line"></span><br><span class="line">sk.close()</span><br><span class="line">csk.close()</span><br></pre></td></tr></table></figure>
+
+<p>基本上一看就能 get 到。只有几个需要注意的地方</p>
+<ol>
+<li>socket()参数和 C 一模一样;</li>
+<li>bind()的参数直接写一个元组(IP, PORT)即可，IP 直接是点十表示法的字符串，PORT 是个 INT，都是小端序即可！比 C&#x2F;C++的 bind 简单好多，对 IP 和 PORT 的处理全被 API 封装起来啦！</li>
+<li>listen()是 sk 的成员函数，自然只需要传第二个 backlog 参数了; 同理 accept()无参数</li>
+<li>Python 毕竟是跨平台的，没有继承 everthing is a file 的思想，用 csk.sendall(msg)和 msg &#x3D; csk.recv(max_bytes)来读写 Socekt</li>
+<li>用 csk.close()关闭 socket</li>
+</ol>
+<h3 id="Python-Socekt-数据传输：Pack-amp-Unpack-结构体数据"><a href="#Python-Socekt-数据传输：Pack-amp-Unpack-结构体数据" class="headerlink" title="Python Socekt 数据传输：Pack&amp;Unpack 结构体数据"></a>Python Socekt 数据传输：Pack&amp;Unpack 结构体数据</h3><p>Python 的一个核心思想是 Everything is an object…甚至一个 Int 都是对象，有它们的成员函数。但是网络传输时肯定只能传数据的二进制序列，所以涉及到了 pack(打包要写的数据)-sendall 和 recv-unpack(解码要写的数据)两个过程</p>
+<p>Python 提供了两个 API–pack &amp; unpack 做到这件事</p>
+<p>pack(format,var1,var2,…)：简单来说就是把 Python Object 里面的成员变量拿出来排在一起，然后转换成对应的二进制格式，也就是弄成了 C 的存储格式。<br>var1、var2、…即是 Python 的基本类型，例如 Int、Long、Sring 这些，format 则是指定如何 pack 这些 vars。<a target="_blank" rel="noopener" href="https://docs.python.org/3/library/struct.html">RTFM of struct module 后</a>可以找到一张表</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>C Type</th>
+<th>Python type</th>
+<th>Standard size</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>x</td>
+<td>pad byte</td>
+<td>no value</td>
+<td>c</td>
+<td>char</td>
+</tr>
+<tr>
+<td>1</td>
+<td>b</td>
+<td>signed char</td>
+<td>integer</td>
+<td>1</td>
+</tr>
+<tr>
+<td>B</td>
+<td>unsigned char</td>
+<td>integer</td>
+<td>1</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>?</td>
+<td>_Bool</td>
+<td>bool</td>
+<td>1</td>
+<td>(1)</td>
+</tr>
+<tr>
+<td>h</td>
+<td>short</td>
+<td>integer</td>
+<td>2</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>H</td>
+<td>unsigned short</td>
+<td>integer</td>
+<td>2</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>i</td>
+<td>int</td>
+<td>integer</td>
+<td>4</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>I</td>
+<td>unsigned int</td>
+<td>integer</td>
+<td>4</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>l</td>
+<td>long</td>
+<td>integer</td>
+<td>4</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>L</td>
+<td>unsigned long</td>
+<td>integer</td>
+<td>4</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>q</td>
+<td>long long</td>
+<td>integer</td>
+<td>8</td>
+<td>(2)</td>
+</tr>
+<tr>
+<td>n</td>
+<td>ssize_t</td>
+<td>integer</td>
+<td></td>
+<td>(3)</td>
+</tr>
+<tr>
+<td>N</td>
+<td>size_t</td>
+<td>integer</td>
+<td></td>
+<td>(3)</td>
+</tr>
+<tr>
+<td>e</td>
+<td>(6)</td>
+<td>float</td>
+<td>2</td>
+<td>(4)</td>
+</tr>
+<tr>
+<td>f</td>
+<td>float</td>
+<td>float</td>
+<td>4</td>
+<td>(4)</td>
+</tr>
+<tr>
+<td>d</td>
+<td>double</td>
+<td>float</td>
+<td>8</td>
+<td>(4)</td>
+</tr>
+<tr>
+<td>s</td>
+<td>char[]</td>
+<td>bytes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>p</td>
+<td>char[]</td>
+<td>bytes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>P</td>
+<td>void*</td>
+<td>integer</td>
+<td></td>
+<td>(5)</td>
+</tr>
+</tbody></table>
+<p>format 中 n sym 有两种情况：</p>
+<ol>
+<li>sym 不为 s 时：n sym 等价与 sym sym sym..sym [repeate n times]，例如”4i”等价于”iiii”</li>
+<li>sym 为 s 时，”ns”意味着把对应的 string 给 pack 成 char[n]字符串</li>
+</ol>
+<p>有了这张表之后，把 Python type pack 成 C struct 的方式就很简单了，例如 pack 一个{int;int;float;char[36]}的结构体然后进行 socket 传输</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pack struct msg to send</span></span><br><span class="line">x = <span class="number">1</span></span><br><span class="line">y = <span class="number">1</span></span><br><span class="line">z = <span class="number">3.1415926</span></span><br><span class="line">hello_str = <span class="string">&quot;Hello, World!&quot;</span></span><br><span class="line">msg = pack(<span class="string">&quot;2if36s&quot;</span>,x,y,z,hello_str.encode())</span><br><span class="line"></span><br><span class="line"><span class="comment"># send msg to socekt</span></span><br><span class="line">csk.sendall(msg)</span><br></pre></td></tr></table></figure>
+
+<p>unpack 也是类似的用法, 返回一个元组，Python 可以直接拆分掉返回的元组，细节读读手册就行。例如解码这个 struct</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># receive msg from socket</span></span><br><span class="line">msg = csk.recv(<span class="number">1024</span>)</span><br><span class="line">x, y, z, hello_str = unpack(msg)</span><br><span class="line">hello_str = hello_str.decode()</span><br></pre></td></tr></table></figure>
+
+<p>还有一个需要注意的，可能 string 比其他 python 基本格式更复杂一点，pack 和 unpack 对 string 的支持仅是二进制格式的，所以需要分别用 encode()和 decode()函数进行二进制-Py 格式的转换，就像上述例子一样。</p>
+<h2 id="Python-Client-Socket"><a href="#Python-Client-Socket" class="headerlink" title="Python Client Socket"></a>Python Client Socket</h2><p>至此位置已经没啥需要注意的啦！就是</p>
+<ol>
+<li>socket()</li>
+<li>connect()</li>
+<li>recv() &amp; sendall()</li>
+<li>close()</li>
+</ol>
+<h3 id="Python-Socket-Client-代码框架"><a href="#Python-Socket-Client-代码框架" class="headerlink" title="Python Socket Client 代码框架"></a>Python Socket Client 代码框架</h3><p>直接贴代码框架</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack, pack</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">INTVAL = <span class="number">3</span></span><br><span class="line">ip_port = (<span class="string">&#x27;127.0.0.1&#x27;</span>, <span class="number">11999</span>)</span><br><span class="line">sk = socket.socket()            <span class="comment"># 创建套接字</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        sk.connect(ip_port)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">except</span> ConnectionRefusedError:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Connection failed, try again in 3s later...&quot;</span>)</span><br><span class="line">        time.sleep(INTVAL)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Unable to handle this error, kill the process...&quot;</span>)</span><br><span class="line">        exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Write your code here</span></span><br><span class="line"><span class="comment"># use two API to communicate:</span></span><br><span class="line"><span class="comment">#     1.csk.sendall(msg) to send msg</span></span><br><span class="line"><span class="comment">#     2.msg = csk.recv(max_bytes) to receive msg</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">sk.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="关于-Python-Socket-的-Error"><a href="#关于-Python-Socket-的-Error" class="headerlink" title="关于 Python Socket 的 Error"></a>关于 Python Socket 的 Error</h3><p>目前写 Demo 代码时只遇到了这个找不到服务器时 connect() API throw 出来的 ConnectionRefusedError，就类似 C&#x2F;C++里的 errno &#x3D;&#x3D; ECONNREFUSED。其他肯能的 error 就没处理啦，没怎么读 Python 的手册，以后遇到了再看吧。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Socekt 通讯不受限编程语言、操作系统和计算机，只要约定好 Server 的 IP：PORT 以及传输数据的格式，任意进程都可以交流, C 和 Python 之间的本机通讯更不再话下了, 确实很 Powerful。<br>除了平时用到的各种互联网应用，还想起来以前做过的两个东西</p>
+<ol>
+<li>一门涉及 ROS 的工科创的课程，在本机上写了一些 node，涉及 C++ node 又涉及 Python node，之间好像也是用网络通讯交流，还规范了一个传输格式，只不过当时抱大腿比较混 hh 也没仔细想过这些，全靠大腿部署代码了(＠＾０＾)!</li>
+<li>还有毕设用的 Carla 平台，想着应该也是用的 Socekt 通讯吧，仿真模块独立运行，Python 启动后和仿真平台进行控制信号、状态量的数据传输。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Sakura
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="http://example.com/2022/10/27/Socekt/" title="Socekt">http://example.com/2022/10/27/Socekt/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C/" rel="tag"># C</a>
+              <a href="/tags/Socekt/" rel="tag"># Socekt</a>
+              <a href="/tags/Computer-Network/" rel="tag"># Computer Network</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/27/How-to-post-a-blog/" rel="prev" title="How to Post a BLog">
+      <i class="fa fa-chevron-left"></i> How to Post a BLog
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/10/27/hello-world/" rel="next" title="Hello World">
+      Hello World <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-Server-Socket"><span class="nav-number">2.</span> <span class="nav-text">C++ Server Socket</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-SOCKET"><span class="nav-number">2.1.</span> <span class="nav-text">创建 SOCKET</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%91%E5%AE%9A-IP%EF%BC%9APORT"><span class="nav-number">2.2.</span> <span class="nav-text">绑定 IP：PORT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE-Socket-%E4%B8%BA%E7%9B%91%E5%90%AC-Socket"><span class="nav-number">2.3.</span> <span class="nav-text">设置 Socket 为监听 Socket</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Socket-%E7%9B%91%E5%90%AC%E8%BF%9E%E6%8E%A5%E8%AF%B7%E6%B1%82"><span class="nav-number">2.4.</span> <span class="nav-text">Socket 监听连接请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-sockaddr-%E5%8F%82%E6%95%B0"><span class="nav-number">2.5.</span> <span class="nav-text">关于 sockaddr 参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-IP%EF%BC%9APORT"><span class="nav-number">2.6.</span> <span class="nav-text">关于 IP：PORT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9AC-x2F-C-Socket-server-%E4%BB%A3%E7%A0%81%E6%A1%86%E6%9E%B6"><span class="nav-number">2.7.</span> <span class="nav-text">总结：C&#x2F;C++ Socket server 代码框架</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-Client-Socket"><span class="nav-number">3.</span> <span class="nav-text">C++ Client Socket</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Connect-Server"><span class="nav-number">3.1.</span> <span class="nav-text">Connect Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9AC-x2F-C-Socket-Client-%E4%BB%A3%E7%A0%81%E6%A1%86%E6%9E%B6"><span class="nav-number">3.2.</span> <span class="nav-text">总结：C&#x2F;C++ Socket Client 代码框架</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-server-Socket"><span class="nav-number">4.</span> <span class="nav-text">Python server Socket</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python-Socket-Server-%E6%A1%86%E6%9E%B6"><span class="nav-number">4.1.</span> <span class="nav-text">Python Socket Server 框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python-Socekt-%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%EF%BC%9APack-amp-Unpack-%E7%BB%93%E6%9E%84%E4%BD%93%E6%95%B0%E6%8D%AE"><span class="nav-number">4.2.</span> <span class="nav-text">Python Socekt 数据传输：Pack&amp;Unpack 结构体数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-Client-Socket"><span class="nav-number">5.</span> <span class="nav-text">Python Client Socket</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python-Socket-Client-%E4%BB%A3%E7%A0%81%E6%A1%86%E6%9E%B6"><span class="nav-number">5.1.</span> <span class="nav-text">Python Socket Client 代码框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-Python-Socket-%E7%9A%84-Error"><span class="nav-number">5.2.</span> <span class="nav-text">关于 Python Socket 的 Error</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Sakura"
+      src="/images/keqing.jpg">
+  <p class="site-author-name" itemprop="name">Sakura</p>
+  <div class="site-description" itemprop="description">日复一日，必有精进</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Sakura</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="Symbols count total">17k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">16 mins.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
