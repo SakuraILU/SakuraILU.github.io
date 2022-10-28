@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Hexo-Github部署自己的个人网站</title>
+    <url>/2022/10/27/How-to-post-a-blogr/</url>
+    <content><![CDATA[<p>write something</p>
+]]></content>
+      <categories>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>Github</tag>
+        <tag>Blog</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Socket网络编程-TCP编程</title>
     <url>/2022/10/27/TCPSocekt/</url>
     <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>遇到个比赛，比赛方提供了 C++代码，但是想用 Python 来弄强化学习，之前试了试 ctypes…学了之后才发现 Python 需要的是一个独立的进程而不是函数调用。想起来比设用的 Carla，似乎需要一个 Server 和 Client 的架构。目前的一个想法是 C++和 Python 之间的进程通讯，C++侧只能在算法里面做些设计，琢磨着应该是 init 和 step 里面加一些通讯的东西，这样的话应该是 1v1 的结构。<br>总之先看看 C++和 Py 通讯的 socket API 怎么弄吧，之前还没用过，只云过中科大的计网课 hh</p>
@@ -348,20 +362,6 @@
         <tag>Socekt</tag>
         <tag>TCP</tag>
         <tag>Computer Network</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo-Github部署自己的个人网站</title>
-    <url>/2022/10/27/How-to-post-a-blogr/</url>
-    <content><![CDATA[<p>write something</p>
-]]></content>
-      <categories>
-        <category>Web</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>Github</tag>
-        <tag>Blog</tag>
       </tags>
   </entry>
 </search>
