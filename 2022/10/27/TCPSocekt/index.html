@@ -20,13 +20,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"codeblogs.tech","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="背景遇到个比赛，比赛方提供了 C++代码，但是想用 Python 来弄强化学习，之前试了试 ctypes…学了之后才发现 Python 需要的是一个独立的进程而不是函数调用。想起来比设用的 Carla，似乎需要一个 Server 和 Client 的架构。目前的一个想法是 C++和 Python 之间的进程通讯，C++侧只能在算法里面做些设计，琢磨着应该是 init 和 step 里面加一些通讯的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Socket网络编程-TCP编程">
-<meta property="og:url" content="http://example.com/2022/10/27/TCPSocekt/index.html">
+<meta property="og:url" content="http://codeblogs.tech/2022/10/27/TCPSocekt/index.html">
 <meta property="og:site_name" content="Sakura">
 <meta property="og:description" content="背景遇到个比赛，比赛方提供了 C++代码，但是想用 Python 来弄强化学习，之前试了试 ctypes…学了之后才发现 Python 需要的是一个独立的进程而不是函数调用。想起来比设用的 Carla，似乎需要一个 Server 和 Client 的架构。目前的一个想法是 C++和 Python 之间的进程通讯，C++侧只能在算法里面做些设计，琢磨着应该是 init 和 step 里面加一些通讯的">
 <meta property="og:locale" content="en_US">
@@ -39,7 +39,7 @@
 <meta property="article:tag" content="Computer Network">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2022/10/27/TCPSocekt/">
+<link rel="canonical" href="http://codeblogs.tech/2022/10/27/TCPSocekt/">
 
 
 <script id="page-configurations">
@@ -195,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/27/TCPSocekt/">
+    <link itemprop="mainEntityOfPage" href="http://codeblogs.tech/2022/10/27/TCPSocekt/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/keqing.jpg">
@@ -618,7 +618,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>Post link: </strong>
-    <a href="http://example.com/2022/10/27/TCPSocekt/" title="Socket网络编程-TCP编程">http://example.com/2022/10/27/TCPSocekt/</a>
+    <a href="http://codeblogs.tech/2022/10/27/TCPSocekt/" title="Socket网络编程-TCP编程">http://codeblogs.tech/2022/10/27/TCPSocekt/</a>
   </li>
   <li class="post-copyright-license">
     <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
@@ -745,7 +745,7 @@
         <a href="mailto:sakura1314@sjtu.edu.cn" title="E-Mail → mailto:sakura1314@sjtu.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
       </span>
       <span class="links-of-author-item">
-        <a href="https://www.zhihu.com/people/sakura-94-11" title="Zhihu → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;sakura-94-11" rel="noopener" target="_blank"><i class="fa fa-th-list fa-fw"></i>Zhihu</a>
+        <a href="https://www.zhihu.com/people/sakura-94-11" title="Zhihu → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;sakura-94-11" rel="noopener" target="_blank"><i class="fa fa-coffee fa-fw"></i>Zhihu</a>
       </span>
   </div>
 
