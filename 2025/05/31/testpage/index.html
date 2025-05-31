@@ -300,7 +300,6 @@
 
           </div>
           
-    <div class="comments" id="gitalk-container"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -504,26 +503,6 @@
   
 
   
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'Iv23liFrBIdgNarbuaIr',
-      clientSecret: '7c7274de091f52900de2278ee3fc2b5e43fccf77',
-      repo        : 'git@github.com:SakuraILU/SakuraILU.github.io.git',
-      owner       : '',
-      admin       : ['SakuraILU'],
-      id          : 'c8e15b4811b479ae853b124fce06b421',
-        language: '',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
 
 </body>
 </html>
