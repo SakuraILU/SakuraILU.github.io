@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>testpage</title>
-    <url>/2025/06/01/testpage/</url>
-    <content><![CDATA[<p>hello word<br>this is for test</p>
+    <title>基于Github+Hexo搭建个人博客</title>
+    <url>/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>为了养成经常做学习记录的习惯，花了一些时间利用 Hexo+nexT+Github Pages 搭建了一个简易的个人博客。这个搭建过程正好作为第一篇博客。</p>
 <span id="more"></span>
 
-<p>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test<br>this is for test</p>
+<h1 id="安装依赖环境"><a href="#安装依赖环境" class="headerlink" title="安装依赖环境"></a>安装依赖环境</h1><p>Hexo 是基于 Node.js 的静态博客框架，虽然个人不太了解 nodejs，不过相关步骤还是比较简单的，照着网上的攻略走就行。在搭建之前，需要确保本地已经安装了 Node.js 和 npm（Node.js 的包管理工具）。以下是具体的安装步骤：</p>
+<h2 id="安装-Node-js-和-npm"><a href="#安装-Node-js-和-npm" class="headerlink" title="安装 Node.js 和 npm"></a>安装 Node.js 和 npm</h2><p>首先，访问 <a href="https://nodejs.org/">Node.js 官方网站</a>，下载并安装适合你操作系统的 Node.js 版本。Node.js 的安装包通常会同时包含 npm，因此安装完成后，你可以通过以下命令检查是否安装成功：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">node -v</span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
+
+<p>如果能够正确输出版本号，说明 Node.js 和 npm 已经安装成功。</p>
+<h1 id="安装-Hexo"><a href="#安装-Hexo" class="headerlink" title="安装 Hexo"></a>安装 Hexo</h1><h2 id="安装-Hexo-1"><a href="#安装-Hexo-1" class="headerlink" title="安装 Hexo"></a>安装 Hexo</h2><p>通过 npm 全局安装 Hexo。打开终端或命令行工具，输入以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后，可以通过以下命令检查是否安装成功：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo -v</span><br></pre></td></tr></table></figure>
+
+<p>如果能够正确输出版本号，说明 Hexo 已经安装成功。</p>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo init hexo-root</span><br><span class="line"><span class="built_in">cd</span> hexo-root</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>现在，hexo 给我们创建了一个关键目录 hex-root。<b>后续的操作都在 hexo-root 目录下执行</b>。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; <span class="built_in">ls</span></span><br><span class="line">_config.landscape.yml  db.json       package-lock.json  public     <span class="built_in">source</span></span><br><span class="line">_config.yml            node_modules  package.json       scaffolds  themes</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="启动本地服务"><a href="#启动本地服务" class="headerlink" title="启动本地服务"></a>启动本地服务</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo generate &amp;&amp; hexo sever</span><br></pre></td></tr></table></figure>
 ]]></content>
+      <categories>
+        <category>blog</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>nexT</tag>
+        <tag>githubPages</tag>
+        <tag>blog</tag>
+      </tags>
   </entry>
 </search>
