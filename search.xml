@@ -32,6 +32,7 @@
 <figure style="text-align:center">
     <img src="/.com//06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/landscape.png" class title="landscape style&#x3D;width:80%">
 </figure>
+![landscape](landscape.png)
 
 <h1 id="nexT-主题配置"><a href="#nexT-主题配置" class="headerlink" title="nexT 主题配置"></a>nexT 主题配置</h1><p>hexo 提供的 landscape 主题不太好看，将其更换为简洁漂亮的 nexT 主题。</p>
 <h2 id="1-主题下载与安装"><a href="#1-主题下载与安装" class="headerlink" title="1. 主题下载与安装"></a>1. 主题下载与安装</h2><p>进入 Hexo 博客根目录 hexo-root（以下均在该目录下进行），执行命令：</p>
@@ -44,9 +45,7 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">scheme: Mist</span><br><span class="line">highlight_theme: night eighties</span><br></pre></td></tr></table></figure>
 
 <p>重新本地测试，发现已经变为简约的 next 主题了！</p>
-<figure style="text-align:center">
-    <img src="/.com//06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/next-origin.png" class title="next-origin style&#x3D;width:80%">
-</figure>
+<p><img src="/.com//next-origin.png" alt="next-origin"></p>
 ]]></content>
       <categories>
         <category>blog</category>
