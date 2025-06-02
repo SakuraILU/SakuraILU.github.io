@@ -58,7 +58,16 @@
 <p>在 next 的 config 里面还能配置联系方式，以便用户有问题可以联系博主</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">social:</span><br><span class="line">  GitHub: &lt;your github <span class="built_in">link</span>&gt; || fab fa-github</span><br><span class="line">  E-Mail: mailto:&lt;your email&gt; || fa fa-envelope</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
 
-<p>至此</p>
+<p>至此，网站有了自己的个人信息展示</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/avatar.png" width="50%">
+</figure>
+
+<h2 id="打赏设置"><a href="#打赏设置" class="headerlink" title="打赏设置"></a>打赏设置</h2><p>在 next 的配置文件中设置微信和支付宝的收款码的 url 链接，注意和之前的头像一样，放在 themes&#x2F;next&#x2F;source&#x2F;images 中。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">reward_settings:</span><br><span class="line">  <span class="comment"># If true, reward will be displayed in every article by default.</span></span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  animation: <span class="literal">false</span></span><br><span class="line">  comment: <span class="string">&#x27;写的不错，赏一个！&#x27;</span> <span class="comment"># Donate comment here.</span></span><br><span class="line"></span><br><span class="line">reward:</span><br><span class="line">    wechatpay: /images/wechatpay.jpg</span><br><span class="line">    alipay: /images/alipay.jpg</span><br></pre></td></tr></table></figure>
+
+<p>在文章末尾新增了 Donate，点击即可展示收款码页面<figure style="text-align:center"><br><img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/reward.png" width="50%"></figure></p>
+
 ]]></content>
       <categories>
         <category>blog</category>
