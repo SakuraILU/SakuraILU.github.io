@@ -28,7 +28,7 @@
 <p>可以看到如下内容</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">INFO  Validating config</span><br><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http://localhost:4000/ . Press Ctrl+C to stop.</span><br></pre></td></tr></table></figure>
 
-<p>浏览器键入网址 <a href="http://localhost:4000/%EF%BC%8C%E5%8F%AF%E4%BB%A5%E7%9C%8B%E5%88%B0%E5%8D%9A%E5%AE%A2%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E6%88%90%E5%8A%9F">http://localhost:4000/，可以看到博客本地部署成功</a></p>
+<p>浏览器键入网址 <a href="http://localhost:4000/%EF%BC%8C">http://localhost:4000/，</a> 可以看到博客本地部署成功</p>
 <figure style="text-align:center">
     <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/landscape.png" width="90%">
 </figure>
@@ -48,6 +48,13 @@
     <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/next-origin.png" width="90%">
 </figure>
 
+<h2 id="汉化"><a href="#汉化" class="headerlink" title="汉化"></a>汉化</h2><p>在 next 主题中可以找到很多语言包</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; <span class="built_in">ls</span>  themes/next/languages</span><br><span class="line">ar.yml  default.yml  es.yml  fr.yml  id.yml  ja.yml  nl.yml     pt.yml  tr.yml  vi.yml     zh-HK.yml    zh-TW.yml</span><br><span class="line">de.yml  en.yml       fa.yml  hu.yml  it.yml  ko.yml  pt-BR.yml  ru.yml  uk.yml  zh-CN.yml</span><br></pre></td></tr></table></figure>
+
+<p>在 hexo 的配置文件中启用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim _config.yml</span><br><span class="line">language: zh-CN</span><br></pre></td></tr></table></figure>
+
+<p>当然，我们可以复制 zh-CN 为别的名称，如 zh-Hans，然后在里面<b>自定义汉化</b>，再设置 language: zh-Hans。</p>
 <h2 id="基本社交信息"><a href="#基本社交信息" class="headerlink" title="基本社交信息"></a>基本社交信息</h2><p>博客网站当然需要一些头像、社交介绍之类的信息。</p>
 <p>首先在 hexo 的配置文件中可以找到一些配置，包括博客名、个性签名等</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim _config.yml</span><br><span class="line"><span class="comment"># Site</span></span><br><span class="line">title: 木子森的博客 <span class="comment"># 博客名</span></span><br><span class="line">subtitle: <span class="string">&#x27;&#x27;</span></span><br><span class="line">description: <span class="string">&#x27;every dog has its day&#x27;</span> <span class="comment"># 个性签名</span></span><br><span class="line">keywords:</span><br><span class="line">author: 木子森 <span class="comment"># 作者名</span></span><br></pre></td></tr></table></figure>
@@ -68,6 +75,25 @@
 
 <p>在文章末尾新增了 Donate，点击即可展示收款码页面<figure style="text-align:center"><br><img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/reward.png" width="50%"></figure></p>
 
+
+<h2 id="菜单栏设置"><a href="#菜单栏设置" class="headerlink" title="菜单栏设置"></a>菜单栏设置</h2><p>默认情况下，菜单栏中只有 Home 和 Archives 两项。通常博客还需要设置上 categories, tags 和 about 三项，前两者用于文章定位，后者用于自我介绍。</p>
+<p>执行 hexo new page 命令创建栏目页面</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo new page <span class="string">&quot;categories&quot;</span></span><br><span class="line">hexo new page <span class="string">&quot;tags&quot;</span></span><br><span class="line">hexo new page <span class="string">&quot;about&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这会在 source&#x2F;目录下生成对应的文件夹，每个文件夹包含一个 index.md 文件。</p>
+<p>接下来，编辑 categories 和 tags 的 index.md 文件，添加对应的类型声明（否则 hexo 会将他们视为普通页面，无法自动建立文章的分类和标签索引）：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim <span class="built_in">source</span>/categories/index.md</span><br><span class="line">---</span><br><span class="line">title: categories</span><br><span class="line"><span class="built_in">date</span>: 2025-05-31 19:31:37</span><br><span class="line"><span class="built_in">type</span>: <span class="string">&quot;categories&quot;</span> <span class="comment"># 新增</span></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim <span class="built_in">source</span>/tags/index.md</span><br><span class="line">---</span><br><span class="line">title: tags</span><br><span class="line"><span class="built_in">date</span>: 2025-05-31 19:31:43</span><br><span class="line"><span class="built_in">type</span>: <span class="string">&quot;tags&quot;</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>在编辑 next 主题配置文件_config.yml（通常是 themes&#x2F;next&#x2F;_config.yml），找到 menu 部分，取消这三项的注释：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  about: /about/ || fa fa-user</span><br></pre></td></tr></table></figure>
+
+<p>如果页面选项的图标显示失败，安装图标</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-theme-next-font-icons</span><br></pre></td></tr></table></figure>
+
+<p>现在，博客有了完整的导航菜单</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/menu.png" width="80%">
+</figure>
 ]]></content>
       <categories>
         <category>blog</category>
@@ -76,7 +102,6 @@
         <tag>hexo</tag>
         <tag>next</tag>
         <tag>github pages</tag>
-        <tag>blog</tag>
       </tags>
   </entry>
 </search>
