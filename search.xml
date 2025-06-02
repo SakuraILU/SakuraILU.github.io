@@ -148,7 +148,7 @@
 <li>repository 名一定要为 github 的名字。</li>
 <li>把”Initialize this repository with a README”勾选上。</li>
 </ul>
-<p>此外，若 Github 还没有自动关联本地的密钥，先生成 key pair 并关联 Github 账户，相关教程可参考 <a href="https://www.cnblogs.com/yessn/p/16295806.html"></a></p>
+<p>此外，若 Github 还没有自动关联本地的密钥，先生成 key pair 并关联 Github 账户，相关教程可参考 <a href="https://www.cnblogs.com/yessn/p/16295806.html">Github 配置 ssh key 的步骤</a></p>
 <h1 id="评论区设置"><a href="#评论区设置" class="headerlink" title="评论区设置"></a>评论区设置</h1><h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="解决图片无法显示的问题"><a href="#解决图片无法显示的问题" class="headerlink" title="解决图片无法显示的问题"></a>解决图片无法显示的问题</h2>]]></content>
       <categories>
         <category>blog</category>
