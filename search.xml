@@ -94,9 +94,18 @@
 <figure style="text-align:center">
     <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/menu.png" width="80%">
 </figure>
+
+<h2 id="Post-设置"><a href="#Post-设置" class="headerlink" title="Post 设置"></a>Post 设置</h2><p>采用如下命令创建一个 post</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo new 基于Github-Hexo搭建个人博客</span><br></pre></td></tr></table></figure>
+
+<p>在 source&#x2F;_posts 下可以找到 testpage.md，实际上直接在 source&#x2F;_posts 下面创建 md 效果相同。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim <span class="built_in">source</span>/_posts/基于Github-Hexo搭建个人博客.md</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">title: 基于Github+Hexo搭建个人博客</span><br><span class="line"><span class="built_in">date</span>: 2025-06-01 13:16:35</span><br><span class="line">categories: blog</span><br><span class="line">tags: [hexo, next, github pages]</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>categories 和 tags 需要手动添加。</p>
 ]]></content>
       <categories>
         <category>blog</category>
+        <category>tutorial</category>
       </categories>
       <tags>
         <tag>hexo</tag>
