@@ -171,6 +171,9 @@
 </ul>
 <p>现在，博客就生成了：http:&#x2F;&#x2F;{your-name}.github.io</p>
 <h1 id="基于-Gitalk-的评论区设置"><a href="#基于-Gitalk-的评论区设置" class="headerlink" title="基于 Gitalk 的评论区设置"></a>基于 Gitalk 的评论区设置</h1><p>检索了一些评论区系统，综合便利性和实用性，考虑选择 <a href="https://github.com/snowdreams1006/hexo-plugin-gitalk">Gitalk</a>。Gitalk 巧妙地将 GitHub Issues 转化为博客评论区！每个博客文章自动创建一个对应的 Issue 作为评论区，完美利用 GitHub Pages 仓库的 Issue 功能（当然你也可以新建专用仓库），非常方便直观，也不需要注册什么别的账户了。</p>
+<h2 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h2><p>安装插件 hexo-plugin-gitalk</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-plugin-gitalk --save</span><br></pre></td></tr></table></figure>
+
 <h2 id="Github-OAuth-App-创建"><a href="#Github-OAuth-App-创建" class="headerlink" title="Github OAuth App 创建"></a>Github OAuth App 创建</h2><p>Gitalk 本质是通过 GitHub API 与你的仓库交互，而所有第三方应用访问 GitHub 数据都需要<strong>安全授权</strong>。OAuth App 就像是给部署的博客颁发了一张专属「访客卡」，用于身份认证、权限控制和用户安全管理。因此，只有给 OAuth App「访客卡」博客的网址，同时给博客这个 OAuth App 「访客卡」的 client_id 和 clientSecret，博客服务才能调用 Github API 读写仓库的 Issue</p>
 <p>访问 <a href="https://github.com/settings/developers">GitHub Developer Settings</a> → “OAuth Apps” → “New OAuth App”</p>
 <p>填写基本信息，主要包括四项</p>
