@@ -125,7 +125,7 @@
 <h3 id="资源引用路径自动修正"><a href="#资源引用路径自动修正" class="headerlink" title="资源引用路径自动修正"></a>资源引用路径自动修正</h3><p>安装插件 hexo-asset-image，在生成服务静态页面时自动将本地资源引用路径转换成正确的线上服务的路径，待线上部署后才能正确引用。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
 
-<p>这里如果粗心直接 npm install hexo-asset-image 的话，会出问题，见<a href="#解决图片无法显示的问题">后文章节-解决图片无法显示的问题</a></p>
+<p>这里如果粗心直接 <code>npm install hexo-asset-image</code> 的话，会出问题，见<a href="#解决图片无法显示的问题">后文章节-解决图片无法显示的问题</a></p>
 <h2 id="站内统计功能"><a href="#站内统计功能" class="headerlink" title="站内统计功能"></a>站内统计功能</h2><p>启用访客统计</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line"></span><br><span class="line">busuanzi_count:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
 
@@ -162,8 +162,8 @@
 <li>通过 hexo-deployer-git 插件将 public 目录内容推送至部署分支</li>
 <li>保留 commit history 的同时更新网站内容</li>
 </ul>
-<h3 id="Github-自动化发布"><a href="#Github-自动化发布" class="headerlink" title="Github 自动化发布"></a>Github 自动化发布</h3><p>GitHub 的构建系统会在检测到该特殊仓库的特定分支更新后，会在 1-3 分钟内完成全球 CDN 节点的博客服务内容分发。我们就可以在 https:&#x2F;&#x2F;<username>.github.io 上看到我们的博客了！</username></p>
-<h2 id="仓库创建"><a href="#仓库创建" class="headerlink" title="仓库创建"></a>仓库创建</h2><p>创建 git repository: <a href="https://github.com/">https://github.com/</a><your username>.github.io。注意两点：</your></p>
+<h3 id="Github-自动化发布"><a href="#Github-自动化发布" class="headerlink" title="Github 自动化发布"></a>Github 自动化发布</h3><p>GitHub 的构建系统会在检测到该特殊仓库的特定分支更新后，会在 1-3 分钟内完成全球 CDN 节点的博客服务内容分发。我们就可以在 <code>https://&lt;username&gt;.github.io</code> 上看到我们的博客了！</p>
+<h2 id="仓库创建"><a href="#仓库创建" class="headerlink" title="仓库创建"></a>仓库创建</h2><p>创建 git repository: <code>https://github.com/&lt;your username&gt;.github.io</code>。注意两点：</p>
 <ul>
 <li>repository 名一定要为 github 的名字。</li>
 <li>把”Initialize this repository with a README”勾选上。</li>
