@@ -122,7 +122,7 @@
 <li>便于查找和管理</li>
 <li>迁移时保持完整关联</li>
 </ul>
-<h3 id="图片引用自动修正"><a href="#图片引用自动修正" class="headerlink" title="图片引用自动修正"></a>图片引用自动修正</h3><p>安装插件 hexo-asset-image，在生成服务静态页面时自动将本地的路径转换成正确的线上服务的路径。</p>
+<h3 id="资源引用路径自动修正"><a href="#资源引用路径自动修正" class="headerlink" title="资源引用路径自动修正"></a>资源引用路径自动修正</h3><p>安装插件 hexo-asset-image，在生成服务静态页面时自动将本地资源引用路径转换成正确的线上服务的路径，待线上部署后才能正确引用。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
 
 <p>这里如果粗心直接 npm install hexo-asset-image 的话，会出问题，见<a href="#解决图片无法显示的问题">后文章节-解决图片无法显示的问题</a></p>
