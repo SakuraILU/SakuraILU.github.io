@@ -108,17 +108,12 @@
     <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/tags.png" width="80%">
 </figure>
 
-<h2 id="Post-关联资源设置"><a href="#Post-关联资源设置" class="headerlink" title="Post 关联资源设置"></a>Post 关联资源设置</h2><h3 id="本地资源管理"><a href="#本地资源管理" class="headerlink" title="本地资源管理"></a>本地资源管理</h3><ol>
-<li>公共资源文件夹（不推荐）</li>
-</ol>
-<ul>
+<h2 id="Post-关联资源设置"><a href="#Post-关联资源设置" class="headerlink" title="Post 关联资源设置"></a>Post 关联资源设置</h2><h3 id="本地资源管理"><a href="#本地资源管理" class="headerlink" title="本地资源管理"></a>本地资源管理</h3><h4 id="公共资源文件夹（不推荐）"><a href="#公共资源文件夹（不推荐）" class="headerlink" title="公共资源文件夹（不推荐）"></a>公共资源文件夹（不推荐）</h4><ul>
 <li>在 <code>source/images/</code> 存放所有图片</li>
 <li>Markdown 引用方式：<code>/images/photo.jpg</code>（上文提到过，编译器会把 source 视为资源的根目录）</li>
 <li>缺点：私有资源存在公共区，随着文档增多难以管理</li>
 </ul>
-<ol start="2">
-<li>文章专属资源文件夹（推荐）<br>Hexo 提供了更好的解决方案 - 为每篇文章自动创建关联资源夹。启用自动创建功能：</li>
-</ol>
+<h4 id="文章专属资源文件夹（推荐）"><a href="#文章专属资源文件夹（推荐）" class="headerlink" title="文章专属资源文件夹（推荐）"></a>文章专属资源文件夹（推荐）</h4><p>Hexo 提供了更好的解决方案 - 为每篇文章自动创建关联资源夹。启用自动创建功能：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim _config.yml</span><br><span class="line">post_asset_folder: <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">引用方式：</span><br><span class="line">![图片说明](文章标题/photo.jpg)</span><br></pre></td></tr></table></figure>
 
 <p>该方案具有如下优势：</p>
@@ -127,7 +122,11 @@
 <li>便于查找和管理</li>
 <li>迁移时保持完整关联</li>
 </ul>
-<h2 id="站内搜索功能"><a href="#站内搜索功能" class="headerlink" title="站内搜索功能"></a>站内搜索功能</h2><p>为了支持标题和全文检索，给站内增加搜索功能。下载搜索插件，并启用相关配置项。</p>
+<h3 id="安装-hexo-asset-image"><a href="#安装-hexo-asset-image" class="headerlink" title="安装 hexo-asset-image"></a>安装 hexo-asset-image</h3><p>安装插件 hexo-asset-image，在生成服务静态页面时自动将本地的路径转换成正确的线上服务的路径。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
+
+<p>这里如果粗心直接 npm install hexo-asset-image 的话，会出问题，见<a href="## 解决图片无法显示的问题">后文章节-解决图片无法显示的问题</a></p>
+<h2 id="站内统计功能"><a href="#站内统计功能" class="headerlink" title="站内统计功能"></a>站内统计功能</h2><h2 id="站内搜索功能"><a href="#站内搜索功能" class="headerlink" title="站内搜索功能"></a>站内搜索功能</h2><p>为了支持标题和全文检索，给站内增加搜索功能。下载搜索插件，并启用相关配置项。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; npm install hexo-generator-search --save</span><br><span class="line">&gt;&gt; npm install hexo-generator-searchdb --save</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim _config.xml</span><br><span class="line">search:</span><br><span class="line">  path: search.xml</span><br><span class="line">  field: post</span><br><span class="line">  format: html</span><br><span class="line">  <span class="built_in">limit</span>: 10000</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">local_search:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  trigger: auto</span><br><span class="line">  top_n_per_article: 1</span><br><span class="line">  unescape: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
 
 <h1 id="公有部署"><a href="#公有部署" class="headerlink" title="公有部署"></a>公有部署</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>我们采用 GitHub Pages 作为公有网络部署平台，其核心工作原理如下：</p>
@@ -170,7 +169,7 @@
 <li>第三条命令：把第二步生成的静态页面上传到 github。</li>
 </ul>
 <p>现在，博客就生成了：http:&#x2F;&#x2F;{your-name}.github.io</p>
-<h1 id="基于-Gitalk-的评论区设置"><a href="#基于-Gitalk-的评论区设置" class="headerlink" title="基于 Gitalk 的评论区设置"></a>基于 Gitalk 的评论区设置</h1><p>检索了一些评论区系统，综合便利性和实用性，考虑选择 <a href="https://github.com/snowdreams1006/hexo-plugin-gitalk">Gitalk</a>。Gitalk 巧妙地将 GitHub Issues 转化为博客评论区！每个博客文章自动创建一个对应的 Issue 作为评论区，完美利用 GitHub Pages 仓库的 Issue 功能（当然你也可以新建专用仓库），非常方便直观，也不需要注册什么别的账户了。</p>
+<h1 id="基于-Gitalk-的评论区设置"><a href="#基于-Gitalk-的评论区设置" class="headerlink" title="基于 Gitalk 的评论区设置"></a>基于 Gitalk 的评论区设置</h1><p>调研了一些评论区系统，综合便利性和实用性，考虑选择 <a href="https://github.com/snowdreams1006/hexo-plugin-gitalk">Gitalk</a>。Gitalk 巧妙地将 GitHub Issues 转化为博客评论区！每个博客文章自动创建一个对应的 Issue 作为评论区，完美利用 GitHub Pages 仓库的 Issue 功能（当然你也可以新建专用仓库），非常方便直观，也不需要注册什么别的账户了。</p>
 <h2 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h2><p>安装插件 hexo-plugin-gitalk</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-plugin-gitalk --save</span><br></pre></td></tr></table></figure>
 
@@ -199,7 +198,9 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim source/tags/index.md</span><br><span class="line">---</span><br><span class="line">title: tags</span><br><span class="line">date: 2025-05-31 19:31:43</span><br><span class="line">type: &quot;tags&quot;</span><br><span class="line">comments: false # 新增</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
 
 <p>其他普通的 post 同理。</p>
-<h2 id="解决图片无法显示的问题"><a href="#解决图片无法显示的问题" class="headerlink" title="解决图片无法显示的问题"></a>解决图片无法显示的问题</h2><p>博客发布后无法显示图片，很奇怪，于是排查了一阵子。Github 仓库里的代码就是 hexo-root&#x2F;public 中的代码，发现 Post 网页的 index.html 中生成的引用并没有正确索引到图片的地址！</p>
+<h2 id="解决图片无法显示的问题"><a href="#解决图片无法显示的问题" class="headerlink" title="解决图片无法显示的问题"></a>解决图片无法显示的问题</h2><p>博客发布后无法显示图片，很奇怪，于是排查了一阵子。Github 仓库里的代码就是 hexo-root&#x2F;public 中的代码，发现 Post 网页的 index.html 中生成的引用并没有正确索引到图片的地址！hexo generate 后，在本地的 public 文件夹（或者再 hexo deploy 后去 Github 仓库里看），图片的放置的路径在&#x2F;2025&#x2F;06&#x2F;01&#x2F;基于 Github-Hexo 搭建个人博客&#x2F;landscape.png，但对应文章的 index.html 里引用的路径却是<img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/landscape.png" width="90%">。乱码是中文编码的关系，不用管，但很明显的一个问题是生成的路径少了前面的“&#x2F;2025”，当然索引不到了！</p>
+<p>查阅了一些文档，发现有人提到是 hexo-asset-image 的版本问题，重新安装即可解决</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm uninstall hexo-asset-image</span><br><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>blog</category>
