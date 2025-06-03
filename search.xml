@@ -219,13 +219,13 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm uninstall hexo-asset-image</span><br><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>blog</category>
-        <category>tutorial</category>
+        <category>Blog</category>
+        <category>Tutorial</category>
       </categories>
       <tags>
-        <tag>hexo</tag>
-        <tag>next</tag>
-        <tag>github pages</tag>
+        <tag>Hexo</tag>
+        <tag>Next主题</tag>
+        <tag>Github Pages</tag>
       </tags>
   </entry>
 </search>
