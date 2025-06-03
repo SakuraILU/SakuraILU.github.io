@@ -170,7 +170,11 @@
 <li>第三条命令：把第二步生成的静态页面上传到 github。</li>
 </ul>
 <p>现在，博客就生成了：http:&#x2F;&#x2F;{your-name}.github.io</p>
-<h1 id="评论区设置"><a href="#评论区设置" class="headerlink" title="评论区设置"></a>评论区设置</h1><h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="解决图片无法显示的问题"><a href="#解决图片无法显示的问题" class="headerlink" title="解决图片无法显示的问题"></a>解决图片无法显示的问题</h2><p>博客发布后无法显示图片，很奇怪，于是排查了一阵子。Github 仓库里的代码就是 hexo-root&#x2F;public 中的代码，发现 Post 网页的 index.html 中生成的引用并没有正确索引到图片的地址！</p>
+<h1 id="评论区设置"><a href="#评论区设置" class="headerlink" title="评论区设置"></a>评论区设置</h1><h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="屏蔽部分评论区"><a href="#屏蔽部分评论区" class="headerlink" title="屏蔽部分评论区"></a>屏蔽部分评论区</h2><p>注意到 categories、tags 和 about 这些 pages 中存在评论区，很奇怪，需要屏蔽。在<a href="https://blog.csdn.net/Damon___/article/details/79122064">教程</a>中找到了方法，只需要在 source&#x2F;about&#x2F;index.md，source&#x2F;categories&#x2F;index.md，source&#x2F;tags&#x2F;index.md 的 header 中加入 comments: false 条目</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim source/tags/index.md</span><br><span class="line">---</span><br><span class="line">title: tags</span><br><span class="line">date: 2025-05-31 19:31:43</span><br><span class="line">type: &quot;tags&quot;</span><br><span class="line">comments: false # 新增</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>其他普通的 post 同理。</p>
+<h2 id="解决图片无法显示的问题"><a href="#解决图片无法显示的问题" class="headerlink" title="解决图片无法显示的问题"></a>解决图片无法显示的问题</h2><p>博客发布后无法显示图片，很奇怪，于是排查了一阵子。Github 仓库里的代码就是 hexo-root&#x2F;public 中的代码，发现 Post 网页的 index.html 中生成的引用并没有正确索引到图片的地址！</p>
 ]]></content>
       <categories>
         <category>blog</category>
