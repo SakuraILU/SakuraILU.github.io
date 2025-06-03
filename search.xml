@@ -126,8 +126,24 @@
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
 
 <p>这里如果粗心直接 npm install hexo-asset-image 的话，会出问题，见<a href="## 解决图片无法显示的问题">后文章节-解决图片无法显示的问题</a></p>
-<h2 id="站内统计功能"><a href="#站内统计功能" class="headerlink" title="站内统计功能"></a>站内统计功能</h2><h2 id="站内搜索功能"><a href="#站内搜索功能" class="headerlink" title="站内搜索功能"></a>站内搜索功能</h2><p>为了支持标题和全文检索，给站内增加搜索功能。下载搜索插件，并启用相关配置项。</p>
+<h2 id="站内统计功能"><a href="#站内统计功能" class="headerlink" title="站内统计功能"></a>站内统计功能</h2><p>启用访客统计</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line"></span><br><span class="line">busuanzi_count:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>增加字数统计和阅读时常统计</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; npm install hexo-symbols-count-time --save</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">symbols_count_time:</span><br><span class="line">  separated_meta: <span class="literal">true</span></span><br><span class="line">  item_text_post: <span class="literal">true</span></span><br><span class="line">  item_text_total: <span class="literal">false</span></span><br><span class="line">  symbols: <span class="literal">true</span></span><br><span class="line">  <span class="keyword">time</span>: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>发布文章后，即可看到</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/count.png" width="80%">
+</figure>
+
+<h2 id="站内搜索功能"><a href="#站内搜索功能" class="headerlink" title="站内搜索功能"></a>站内搜索功能</h2><p>为了支持标题和全文检索，给站内增加搜索功能。下载搜索插件，并启用相关配置项。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; npm install hexo-generator-search --save</span><br><span class="line">&gt;&gt; npm install hexo-generator-searchdb --save</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim _config.xml</span><br><span class="line">search:</span><br><span class="line">  path: search.xml</span><br><span class="line">  field: post</span><br><span class="line">  format: html</span><br><span class="line">  <span class="built_in">limit</span>: 10000</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">local_search:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  trigger: auto</span><br><span class="line">  top_n_per_article: 1</span><br><span class="line">  unescape: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>现在，可以进行博客内的标记&amp;全文检索了</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/search.png" width="80%">
+</figure>
 
 <h1 id="公有部署"><a href="#公有部署" class="headerlink" title="公有部署"></a>公有部署</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>我们采用 GitHub Pages 作为公有网络部署平台，其核心工作原理如下：</p>
 <h3 id="特殊功能的-Github-仓库"><a href="#特殊功能的-Github-仓库" class="headerlink" title="特殊功能的 Github 仓库"></a>特殊功能的 Github 仓库</h3><p>GitHub 将特定命名的代码仓库（格式：<username>.github.io 或<orgname>.github.io）自动识别为 Pages 服务源<br>该仓库 master&#x2F;main 或 gh-pages 分支的内容将被自动发布至 https:&#x2F;&#x2F;<username>.github.io 域名</username></orgname></username></p>
