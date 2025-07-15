@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Pytorch详细安装教程</title>
+    <url>/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>遇到项目需要用到强化学习的内容，自己的系统之前给重装了，Pytorch 没了，重新安装一遍（苦逼）…因为自己以及帮别人前后装过几次，每次都得查来查去，这次决定顺手记录一下从零开始的安装流程，以防万一。</p>
+<span id="more"></span>
+
+<h1 id="安装-CUDA-Toolkit"><a href="#安装-CUDA-Toolkit" class="headerlink" title="安装 CUDA Toolkit"></a>安装 CUDA Toolkit</h1><h2 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h2><p>本机的状况：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; uname -a （指令集架构）</span><br><span class="line">Linux lky-laptop 6.8.0-55-generic #57-Ubuntu SMP PREEMPT_DYNAMIC Wed Feb 12 23:42:21 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux</span><br><span class="line"></span><br><span class="line">&gt;&gt; lsb_release -a （系统版本）</span><br><span class="line">No LSB modules are available.</span><br><span class="line">Distributor ID:	Linuxmint</span><br><span class="line">Description:	Linux Mint 22.1</span><br><span class="line">Release:	22.1</span><br><span class="line">Codename:	xia</span><br><span class="line"></span><br><span class="line">&gt;&gt; nvidia-smi （GPU驱动支持的CUDA版本）</span><br><span class="line">Mon Jul 14 18:56:44 2025</span><br><span class="line">+-----------------------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 550.120                Driver Version: 550.120        CUDA Version: 12.4     |</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，电脑是 x86-64 指令集架构，OS 是 Linux Mint 22.1 (对应 Ubuntu 22.04)，显卡驱动支持 CUDA 12.4</p>
+<p>如果没有安装 CUDA，请查询相关教程。Linux Mint 系统安装的时候记得有自动安装 NVdia 显卡驱动，自己应该是那时候装上的。</p>
+<h2 id="安装-Toolkit"><a href="#安装-Toolkit" class="headerlink" title="安装 Toolkit"></a>安装 Toolkit</h2><p>进入<a href="https://developer.nvidia.com/cuda-toolkit-archive">NVdia 官网</a>，可以看到所有历史版本的 CUDA Toolkit（包括最新和旧版）。找到目标版本 CUDA Toolkit 12.4，进入安装页面。</p>
+<p>按<a href="#前置条件">前文</a>查到的系统类型选择，Linux-x86-64-Ubuntu-22.04，选择 local 安装。</p>
+<figure style="text-align:center">
+    <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_cuda.png" width="80%">
+</figure>
+
+<p>页面下方给出了一堆安装命令，全部执行即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin</span><br><span class="line">sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600</span><br><span class="line">wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo dpkg -i cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo cp /var/cuda-repo-ubuntu2204-12-4-local/cuda-*-keyring.gpg /usr/share/keyrings/</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get -y install cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
+
+<h2 id="问题排查：APT-无法-locate-CUDA-Toolkit"><a href="#问题排查：APT-无法-locate-CUDA-Toolkit" class="headerlink" title="问题排查：APT 无法 locate CUDA Toolkit"></a>问题排查：APT 无法 locate CUDA Toolkit</h2><p>安装的时候遇到了一些问题，执行最后一条命令的时候遇到了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; sudo apt-get -y install cuda-toolkit-12-4</span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree... Done</span><br><span class="line">Reading state information... Done</span><br><span class="line">E: Unable to locate package cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
+
+<p>重新执行了几次上述一堆命令，仍然无效 T^T</p>
+<p>为了排解问题，首先看看 apt 里有哪儿些 cuda 相关的包。于是我输入 <code>sudo apt install -y cuda- </code>后，按 Tab 键进行自动补全提示（oh-my-zsh 的很方便的一个插件），得到</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; sudo apt install -y cuda-[键入Tab]</span><br><span class="line">sudo apt install -y cuda-[进行tab提示]</span><br><span class="line">cuda-drivers-fabricmanager-450 cuda-drivers-fabricmanager-535</span><br><span class="line">cuda-drivers-fabricmanager-460 cuda-drivers-fabricmanager-550</span><br><span class="line">cuda-drivers-fabricmanager-470 cuda-drivers-fabricmanager-565</span><br><span class="line">cuda-drivers-fabricmanager-510 cuda-drivers-fabricmanager-570</span><br><span class="line">cuda-drivers-fabricmanager-515 cuda-repo-ubuntu2204-12-4-local</span><br><span class="line">cuda-drivers-fabricmanager-525</span><br></pre></td></tr></table></figure>
+
+<p>只有如上全部内容，可以看到没有 cuda toolkit 的包，但奇怪的是，有一堆 cuda-dirvers 和一个<b>cuda-repo-ubuntu2204-12-4-local</b>，感觉 CUDA 仓库加载了但没完全加载…</p>
+<p>不管咋说，之后重新搞，总得先把现在这个半残仓库清除掉，不然旧仓库可能会和新仓库产生优先级冲突，此外 apt update 也有可能仍使用旧缓存，找不到新包…执行如下命令进行清除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## 清理旧仓库</span><br><span class="line">sudo dpkg -P cuda-repo-ubuntu2204-12-4-local  # 卸载旧仓库包</span><br><span class="line">sudo rm -rf /var/cuda-repo-*                  # 删除残留元数据</span><br><span class="line"></span><br><span class="line">## 强制刷新 APT 缓存</span><br><span class="line">sudo apt clean                # 清理下载的 .deb 缓存</span><br><span class="line">sudo rm -rf /var/lib/apt/lists/*  # 删除所有仓库缓存</span><br><span class="line">sudo apt update               # 强制重新加载仓库</span><br></pre></td></tr></table></figure>
+
+<p>接下来，重新执行官方安装命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin</span><br><span class="line">sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600</span><br><span class="line">wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo dpkg -i cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo cp /var/cuda-repo-ubuntu2204-12-4-local/cuda-*-keyring.gpg /usr/share/keyrings/</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get -y install cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
+
+<p>这下成功了…!真是奇怪的问题。</p>
+<p>不过发现命令行还是找不到 nvcc，怀疑是路径问题，查了一下，nvcc 是被安装&#x2F;usr&#x2F;local&#x2F;cuda-12.4&#x2F;bin&#x2F;nvcc 下面，执行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; /usr/local/cuda-12.4/bin/nvcc --version</span><br><span class="line">nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">Built on Tue_Feb_27_16:19:38_PST_2024</span><br><span class="line">Cuda compilation tools, release 12.4, V12.4.99</span><br><span class="line">Build cuda_12.4.r12.4/compiler.33961263_0</span><br></pre></td></tr></table></figure>
+
+<p>ok!</p>
+<p>于是应该只需要添加路径到 PATH 即可，不过安全起见，看看下载好 nvcc 后到底有哪儿些设置。查阅<a href="https://www.cnblogs.com/gishuanhuan/p/17682644.html">网络</a>后发现除了 PATH，还需要设置 LD_LIBRARY_PATH</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export CUDA_HOME=/usr/local/cuda-12.4</span><br><span class="line">export PATH=$&#123;CUDA_HOME&#125;/bin:$PATH # OS检索可执行文件的路径</span><br><span class="line">export LD_LIBRARY_PATH=$&#123;CUDA_HOME&#125;/lib64:$PATH # ld.so检索动态链接库的路径</span><br></pre></td></tr></table></figure>
+
+<p>那 LD_LIBRARY_PATH 是什么？想起以前 OS 课讲动态链接的时候提到过，是 <a href="https://man7.org/linux/man-pages/man8/ld.so.8.html">ld.so （动态连接器）</a> 运行时查找动态链接库.so 的时候要用的，也就是动态链接库路径，基于 CUDA 的程序（比如深度学习库 PyTorch&#x2F;TensorFlow 等）在运行时依赖 lib64 下面的.so 库。看一看 lib64 下面的内容就知道了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; ls /usr/local/cuda-12.4/lib64</span><br><span class="line">cmake                         libnppial.so.12</span><br><span class="line">libOpenCL.so                  libnppial.so.12.2.5.2</span><br><span class="line">libOpenCL.so.1                libnppial_static.a</span><br><span class="line">libOpenCL.so.1.0              libnppicc.so</span><br><span class="line">libOpenCL.so.1.0.0            libnppicc.so.12</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>至此，命令行可以键入 nvcc，ld.so 也可以加载 cuda 动态库了，cuda toolkit 安装完毕</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; nvcc --version</span><br><span class="line">nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">Built on Tue_Feb_27_16:19:38_PST_2024</span><br><span class="line">Cuda compilation tools, release 12.4, V12.4.99</span><br><span class="line">Build cuda_12.4.r12.4/compiler.33961263_0</span><br></pre></td></tr></table></figure>
+
+<h1 id="基于-Conda-安装-PyTorch（GPU-版）"><a href="#基于-Conda-安装-PyTorch（GPU-版）" class="headerlink" title="基于 Conda 安装 PyTorch（GPU 版）"></a>基于 Conda 安装 PyTorch（GPU 版）</h1><h2 id="查找适配-CUDA-12-6-的-Pytorch-版本"><a href="#查找适配-CUDA-12-6-的-Pytorch-版本" class="headerlink" title="查找适配 CUDA 12.6 的 Pytorch 版本"></a>查找适配 CUDA 12.6 的 Pytorch 版本</h2><p>在<a href="https://pytorch.org/">Pytorch 官网</a>上没找到 stabe 版本对 cuda-12.4 的支持。Pytorch 一般是适当向下兼容的，规则为:</p>
+<ol>
+<li>PyTorch 只认编译时的 CUDA 主版本（如 12.x），但允许在更高次版本驱动上运行;</li>
+<li>驱动版本必须 ≥ PyTorch 编译时的 CUDA 版本（由 nvidia-smi 显示的驱动版本决定）。</li>
+</ol>
+<p>简单来说就是大版本向下兼容。与是，选择官网首页列出的支持到 CUDA-12.6 的 Stable-Linux-Pip-Python-CUDA12.6 的 Pytorch 进行安装。</p>
+<figure style="text-align:center">
+    <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_pytorch.png" width="80%">
+</figure>
+
+<p>安装命令为<code>pip3 install torch torchvision torchaudio</code>。<b>看这命令，应该支持到 CUDA12.6 的 Pytorch 应该就是默认主流版本了</b>。</p>
+<p>另外需要注意的是 Python 版本，<b>NOTE 里要求 Python&gt;&#x3D;3.9</b>。因为后面可能需要安装 stable-baselines3，提前去官网看一下环境要求：Stable-Baselines3 requires python 3.9+ and PyTorch &gt;&#x3D; 2.3。所以 Python&gt;&#x3D;3.9 + 默认主流版本的 pytorch 应该没有潜在依赖问题。</p>
+<h2 id="创建-Conda-环境"><a href="#创建-Conda-环境" class="headerlink" title="创建 Conda 环境"></a>创建 Conda 环境</h2><p>Python 库特别杂，各种依赖问题，为了隔离环境，用 Conda 进行虚拟环境隔离。个人比较推荐纯命令行的 miniconda，构建和管理虚拟环境足够用了，安装很简单，参考<a href="https://www.anaconda.com/docs/getting-started/miniconda/install#linux">官方文档<a>。</a></a></p>
+<p>以防万一，创建稍微比 3.9 新一点的 Python3.10 虚拟环境 RL。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; conda create -n RL python=3.10</span><br><span class="line"></span><br><span class="line">&gt;&gt; python --version</span><br><span class="line">Python 3.10.18</span><br></pre></td></tr></table></figure>
+
+<p>激活环境并根据<a href="#查找适配 CUDA 12.6 的 Pytorch 版本">前文</a>确定的 Pytorch 版本安装 Pytorch</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; conda activate RL</span><br><span class="line">&gt;&gt; (RL) pip3 install torch torchvision torchaudio</span><br></pre></td></tr></table></figure>
+
+<p>安装过程比较漫长，慢慢等吧…</p>
+<h2 id="相关验证"><a href="#相关验证" class="headerlink" title="相关验证"></a>相关验证</h2><h3 id="PyTorch-是否成功安装"><a href="#PyTorch-是否成功安装" class="headerlink" title="PyTorch 是否成功安装"></a>PyTorch 是否成功安装</h3><p>完成后，键入如下命令查看 torch 及其版本</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; (RL) python</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; print(torch.__version__)</span><br><span class="line">2.7.1+cu126</span><br></pre></td></tr></table></figure>
+
+<p>安装了支持到 cuda12.6 的 torch2.7.1</p>
+<p>至此，我们安装了 GPU 驱动（Version: 550.144.03）+ CUDA（Version: 12.4）+ Python(Version: 3.10.18) + Pytorch（Version: 2.7.1+cuda126）。</p>
+<h3 id="验证-GPU-是否可用"><a href="#验证-GPU-是否可用" class="headerlink" title="验证 GPU 是否可用"></a>验证 GPU 是否可用</h3><p>运行以下代码检查 PyTorch 能否调用 CUDA 访问 GPU</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; (RL) python</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.is_available())  # 检查 CUDA 是否可用（True 表示 GPU 可用）</span><br><span class="line">True</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.device_count())  # 显示可用 GPU 数量</span><br><span class="line">1</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.get_device_name(0))  # 输出第 1 块 GPU 的名称（如 &quot;NVIDIA RTX 3090&quot;）</span><br><span class="line">NVIDIA GeForce RTX 3060 Laptop GPU</span><br></pre></td></tr></table></figure>
+
+<h3 id="检查-CUDA-版本"><a href="#检查-CUDA-版本" class="headerlink" title="检查 CUDA 版本"></a>检查 CUDA 版本</h3><p>运行以下代码查看 PyTorch 支持到的 CUDA 版本：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; print(torch.version.cuda)  # 输出 PyTorch 使用的 CUDA 版本</span><br><span class="line">&gt;&gt;&gt; print(torch.version.cuda)</span><br><span class="line">12.6</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证-cuDNN-是否可用"><a href="#验证-cuDNN-是否可用" class="headerlink" title="验证 cuDNN 是否可用"></a>验证 cuDNN 是否可用</h3><p>cuDNN（CUDA Deep Neural Network library）是深度学习加速库，专门用于优化 GPU 上的深度神经网络计算（如卷积、池化、LSTM 等），是 CUDA 生态的重要组成部分。记得以前安装的时候还需要手动从官网下载，版本对应也怪麻烦的，没想到现在官方在预编译的 PyTorch 二进制包（pip&#x2F;conda 安装） 中直接集成了 对应版本的 cuDNN，太妙了。查了以下，应该是从 PyTorch 1.6 版本开始的。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; print(torch.backends.cudnn.version())  # 输出 cuDNN 版本</span><br><span class="line">90501</span><br><span class="line">print(torch.backends.cudnn.is_available())  # 检查 cuDNN 是否可用</span><br><span class="line">True</span><br></pre></td></tr></table></figure>
+
+<h3 id="运行一个小型-GPU-测试"><a href="#运行一个小型-GPU-测试" class="headerlink" title="运行一个小型 GPU 测试"></a>运行一个小型 GPU 测试</h3><p>最后，用以下脚本启用 cuDNN, 用 cuda 在 GPU 上跑个卷积层看看。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import torch</span><br><span class="line"></span><br><span class="line"># 启用 cuDNN 加速</span><br><span class="line">torch.backends.cudnn.enabled = True</span><br><span class="line"></span><br><span class="line"># 构造一个卷积操作（会调用 cuDNN）</span><br><span class="line">input_data = torch.randn(1, 3, 32, 32).cuda()  # [batch, channel, height, width]</span><br><span class="line">conv_layer = torch.nn.Conv2d(3, 64, kernel_size=3).cuda()  # 输入通道3，输出通道64</span><br><span class="line">output = conv_layer(input_data)  # 此操作会调用 cuDNN</span><br><span class="line"></span><br><span class="line">print(output.shape)  # 输出形状 [1, 64, 30, 30]</span><br><span class="line"></span><br><span class="line">out: torch.Size([1, 64, 30, 30])</span><br></pre></td></tr></table></figure>
+
+<p>如果代码正常运行，说明 PyTorch + CUDA + cuDNN + GPU 全部可用。</p>
+]]></content>
+      <categories>
+        <category>Pytorch</category>
+        <category>tutorial</category>
+      </categories>
+      <tags>
+        <tag>Pytorch</tag>
+        <tag>Conda</tag>
+        <tag>DeepLearning</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于Github+Hexo搭建个人博客</title>
+    <url>/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>为了养成经常做学习记录的习惯，花了一些时间利用 Hexo+next+Github Pages 搭建了一个简易的个人博客。这个搭建过程正好作为第一篇博客。</p>
+<span id="more"></span>
+
+<h1 id="安装依赖环境"><a href="#安装依赖环境" class="headerlink" title="安装依赖环境"></a>安装依赖环境</h1><p>Hexo 是基于 Node.js 的静态博客框架，虽然个人不太了解 nodejs，不过相关步骤还是比较简单的，照着网上的攻略走就行。在搭建之前，需要确保本地已经安装了 Node.js 和 npm（Node.js 的包管理工具）。以下是具体的安装步骤：</p>
+<h2 id="安装-Node-js-和-npm"><a href="#安装-Node-js-和-npm" class="headerlink" title="安装 Node.js 和 npm"></a>安装 Node.js 和 npm</h2><p>首先，访问 <a href="https://nodejs.org/">Node.js 官方网站</a>，下载并安装适合你操作系统的 Node.js 版本。Node.js 的安装包通常会同时包含 npm，因此安装完成后，你可以通过以下命令检查是否安装成功：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">node -v</span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
+
+<p>如果能够正确输出版本号，说明 Node.js 和 npm 已经安装成功。</p>
+<h1 id="本地部署"><a href="#本地部署" class="headerlink" title="本地部署"></a>本地部署</h1><h2 id="安装-Hexo"><a href="#安装-Hexo" class="headerlink" title="安装 Hexo"></a>安装 Hexo</h2><p>通过 npm 全局安装 Hexo。打开终端或命令行工具，输入以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后，可以通过以下命令检查是否安装成功：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo -v</span><br></pre></td></tr></table></figure>
+
+<p>如果能够正确输出版本号，说明 Hexo 已经安装成功。</p>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo init hexo-root</span><br><span class="line"><span class="built_in">cd</span> hexo-root</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>现在，hexo 给我们创建了一个关键目录 hex-root。<b>后续的操作都在 hexo-root 目录下执行</b>。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; <span class="built_in">ls</span></span><br><span class="line">_config.landscape.yml  db.json       package-lock.json  public     <span class="built_in">source</span></span><br><span class="line">_config.yml            node_modules  package.json       scaffolds  themes</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo generate &amp;&amp; hexo sever</span><br></pre></td></tr></table></figure>
+
+<p>可以看到如下内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">INFO  Validating config</span><br><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http://localhost:4000/ . Press Ctrl+C to stop.</span><br></pre></td></tr></table></figure>
+
+<p>浏览器键入网址 <a href="http://localhost:4000/%EF%BC%8C">http://localhost:4000/，</a> 可以看到博客本地部署成功</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/landscape.png" width="90%">
+</figure>
+
+<h1 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h1><p>hexo 提供的 landscape 主题不太好看，将其更换为简洁漂亮的 next 主题。</p>
+<h2 id="主题下载与安装"><a href="#主题下载与安装" class="headerlink" title="主题下载与安装"></a>主题下载与安装</h2><p>进入 Hexo 博客根目录 hexo-root（以下均在该目录下进行），执行命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/next-theme/hexo-theme-next themes/next themes/next</span><br></pre></td></tr></table></figure>
+
+<p>next 主题就被下载到 themes 文件夹下了。接下来让 hexo 使用 next 主题，编辑 hexo 的_config.yml 文件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim _config.yml</span><br><span class="line">theme: next</span><br></pre></td></tr></table></figure>
+
+<p>themes&#x2F;next&#x2F;_config.yml 里面是 next 主题的配置，可以做一些个性化选择</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">scheme: Mist</span><br><span class="line">highlight_theme: night eighties</span><br></pre></td></tr></table></figure>
+
+<p>重新本地测试，发现已经变为简约的 next 主题了！</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/next-origin.png" width="90%">
+</figure>
+
+<h2 id="汉化"><a href="#汉化" class="headerlink" title="汉化"></a>汉化</h2><p>在 next 主题中可以找到很多语言包</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; <span class="built_in">ls</span>  themes/next/languages</span><br><span class="line">ar.yml  default.yml  es.yml  fr.yml  id.yml  ja.yml  nl.yml     pt.yml  tr.yml  vi.yml     zh-HK.yml    zh-TW.yml</span><br><span class="line">de.yml  en.yml       fa.yml  hu.yml  it.yml  ko.yml  pt-BR.yml  ru.yml  uk.yml  zh-CN.yml</span><br></pre></td></tr></table></figure>
+
+<p>在 hexo 的配置文件中启用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim _config.yml</span><br><span class="line">language: zh-CN</span><br></pre></td></tr></table></figure>
+
+<p>当然，我们可以复制 zh-CN 为别的名称，如 zh-Hans，然后在里面<b>自定义汉化</b>，再设置 language: zh-Hans。</p>
+<h2 id="基本社交信息"><a href="#基本社交信息" class="headerlink" title="基本社交信息"></a>基本社交信息</h2><p>博客网站当然需要一些头像、社交介绍之类的信息。</p>
+<p>首先在 hexo 的配置文件中可以找到一些配置，包括博客名、个性签名等</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim _config.yml</span><br><span class="line"><span class="comment"># Site</span></span><br><span class="line">title: 木子森的博客 <span class="comment"># 博客名</span></span><br><span class="line">subtitle: <span class="string">&#x27;&#x27;</span></span><br><span class="line">description: <span class="string">&#x27;every dog has its day&#x27;</span> <span class="comment"># 个性签名</span></span><br><span class="line">keywords:</span><br><span class="line">author: 木子森 <span class="comment"># 作者名</span></span><br></pre></td></tr></table></figure>
+
+<p>然后，在 next 的配置文件中可以设置头像的 url 配置项。注意 next 配置文件中的 url 绝对路径是以它的 source 文件夹为根的，即 themes&#x2F;next&#x2F;source，因此需要将图片放于 themes&#x2F;next&#x2F;source&#x2F;images 中，然后用&#x2F;images&#x2F;your photo name 来引用</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line"><span class="comment"># Sidebar Avatar</span></span><br><span class="line">avatar:</span><br><span class="line">  <span class="comment"># Replace the default image and set the url here.</span></span><br><span class="line">  url: /images/citlali.png <span class="comment">#/images/avatar.gif</span></span><br><span class="line">  <span class="comment"># If true, the avatar will be dispalyed in circle.</span></span><br><span class="line">  rounded: <span class="literal">true</span></span><br><span class="line">  <span class="comment"># If true, the avatar will be rotated with the cursor.</span></span><br><span class="line">  rotated: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>在 next 的 config 里面还能配置联系方式，以便用户有问题可以联系博主</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">social:</span><br><span class="line">  GitHub: &lt;your github <span class="built_in">link</span>&gt; || fab fa-github</span><br><span class="line">  E-Mail: mailto:&lt;your email&gt; || fa fa-envelope</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+
+<p>至此，网站有了自己的个人信息展示</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/avatar.png" width="50%">
+</figure>
+
+<h2 id="打赏设置"><a href="#打赏设置" class="headerlink" title="打赏设置"></a>打赏设置</h2><p>在 next 的配置文件中设置微信和支付宝的收款码的 url 链接，注意和之前的头像一样，放在 themes&#x2F;next&#x2F;source&#x2F;images 中。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">reward_settings:</span><br><span class="line">  <span class="comment"># If true, reward will be displayed in every article by default.</span></span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  animation: <span class="literal">false</span></span><br><span class="line">  comment: <span class="string">&#x27;写的不错，赏一个！&#x27;</span> <span class="comment"># Donate comment here.</span></span><br><span class="line"></span><br><span class="line">reward:</span><br><span class="line">    wechatpay: /images/wechatpay.jpg</span><br><span class="line">    alipay: /images/alipay.jpg</span><br></pre></td></tr></table></figure>
+
+<p>在文章末尾新增了 Donate，点击即可展示收款码页面<figure style="text-align:center"><br><img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/reward.png" width="50%"></figure></p>
+
+
+<h2 id="菜单栏设置"><a href="#菜单栏设置" class="headerlink" title="菜单栏设置"></a>菜单栏设置</h2><p>默认情况下，菜单栏中只有 Home 和 Archives 两项。通常博客还需要设置上 categories, tags 和 about 三项，前两者用于文章定位，后者用于自我介绍。</p>
+<p>执行 hexo new page 命令创建栏目页面</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo new page <span class="string">&quot;categories&quot;</span></span><br><span class="line">hexo new page <span class="string">&quot;tags&quot;</span></span><br><span class="line">hexo new page <span class="string">&quot;about&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这会在 source&#x2F;目录下生成对应的文件夹，每个文件夹包含一个 index.md 文件。</p>
+<p>接下来，编辑 categories 和 tags 的 index.md 文件，添加对应的类型声明（否则 hexo 会将他们视为普通页面，无法自动建立文章的分类和标签索引）：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim <span class="built_in">source</span>/categories/index.md</span><br><span class="line">---</span><br><span class="line">title: categories</span><br><span class="line"><span class="built_in">date</span>: 2025-05-31 19:31:37</span><br><span class="line"><span class="built_in">type</span>: <span class="string">&quot;categories&quot;</span> <span class="comment"># 新增</span></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim <span class="built_in">source</span>/tags/index.md</span><br><span class="line">---</span><br><span class="line">title: tags</span><br><span class="line"><span class="built_in">date</span>: 2025-05-31 19:31:43</span><br><span class="line"><span class="built_in">type</span>: <span class="string">&quot;tags&quot;</span></span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>在编辑 next 主题配置文件_config.yml（通常是 themes&#x2F;next&#x2F;_config.yml），找到 menu 部分，取消这三项的注释：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || fa fa-home</span><br><span class="line">  archives: /archives/ || fa fa-archive</span><br><span class="line">  categories: /categories/ || fa fa-th</span><br><span class="line">  tags: /tags/ || fa fa-tags</span><br><span class="line">  about: /about/ || fa fa-user</span><br></pre></td></tr></table></figure>
+
+<p>如果页面选项的图标显示失败，安装图标</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-theme-next-font-icons</span><br></pre></td></tr></table></figure>
+
+<p>现在，博客有了完整的导航菜单</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/menu.png" width="80%">
+</figure>
+
+<h2 id="Post-设置"><a href="#Post-设置" class="headerlink" title="Post 设置"></a>Post 设置</h2><p>采用如下命令创建一个 post</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo new 基于Github-Hexo搭建个人博客</span><br></pre></td></tr></table></figure>
+
+<p>在 source&#x2F;_posts 下可以找到 testpage.md，实际上直接在 source&#x2F;_posts 下面创建 md 效果相同。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim <span class="built_in">source</span>/_posts/基于Github-Hexo搭建个人博客.md</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line">title: 基于Github+Hexo搭建个人博客</span><br><span class="line"><span class="built_in">date</span>: 2025-06-01 13:16:35</span><br><span class="line">categories: [blog, tutorial]</span><br><span class="line">tags: [hexo, next, github pages]</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">your content</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>categories 和 tags 需要手动添加。只有一项时就不用列表的写法啦，如 categories:blog。</p>
+<p>部署后重新打开网站即可以看到文章，注意检查分类和标签是否成功建立了索引。</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/categories.png" width="80%">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/tags.png" width="80%">
+</figure>
+
+<h2 id="Post-关联资源设置"><a href="#Post-关联资源设置" class="headerlink" title="Post 关联资源设置"></a>Post 关联资源设置</h2><h3 id="本地资源管理"><a href="#本地资源管理" class="headerlink" title="本地资源管理"></a>本地资源管理</h3><h4 id="公共资源文件夹（不推荐）"><a href="#公共资源文件夹（不推荐）" class="headerlink" title="公共资源文件夹（不推荐）"></a>公共资源文件夹（不推荐）</h4><ul>
+<li>在 <code>source/images/</code> 存放所有图片</li>
+<li>Markdown 引用方式：<code>/images/photo.jpg</code>（上文提到过，编译器会把 source 视为资源的根目录）</li>
+<li>缺点：私有资源存在公共区，随着文档增多难以管理</li>
+</ul>
+<h4 id="文章专属资源文件夹（推荐）"><a href="#文章专属资源文件夹（推荐）" class="headerlink" title="文章专属资源文件夹（推荐）"></a>文章专属资源文件夹（推荐）</h4><p>Hexo 提供了更好的解决方案 - 为每篇文章自动创建关联资源夹。启用自动创建功能：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim _config.yml</span><br><span class="line">post_asset_folder: <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">引用方式：</span><br><span class="line">![图片说明](文章标题/photo.jpg)</span><br></pre></td></tr></table></figure>
+
+<p>该方案具有如下优势：</p>
+<ul>
+<li>资源与文章一一对应</li>
+<li>便于查找和管理</li>
+<li>迁移时保持完整关联</li>
+</ul>
+<h3 id="资源引用路径自动修正"><a href="#资源引用路径自动修正" class="headerlink" title="资源引用路径自动修正"></a>资源引用路径自动修正</h3><p>安装插件 hexo-asset-image，在生成服务静态页面时自动将本地资源引用路径转换成正确的线上服务的路径，待线上部署后才能正确引用。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
+
+<p>这里如果粗心直接 <code>npm install hexo-asset-image</code> 的话，会出问题，见<a href="#解决图片无法显示的问题">后文章节-解决图片无法显示的问题</a></p>
+<h2 id="站内统计功能"><a href="#站内统计功能" class="headerlink" title="站内统计功能"></a>站内统计功能</h2><p>启用访客统计</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line"></span><br><span class="line">busuanzi_count:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>增加字数统计和阅读时常统计</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; npm install hexo-symbols-count-time --save</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">symbols_count_time:</span><br><span class="line">  separated_meta: <span class="literal">true</span></span><br><span class="line">  item_text_post: <span class="literal">true</span></span><br><span class="line">  item_text_total: <span class="literal">false</span></span><br><span class="line">  symbols: <span class="literal">true</span></span><br><span class="line">  <span class="keyword">time</span>: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>发布文章后，即可看到</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/count.png" width="80%">
+</figure>
+
+<h2 id="站内搜索功能"><a href="#站内搜索功能" class="headerlink" title="站内搜索功能"></a>站内搜索功能</h2><p>为了支持标题和全文检索，给站内增加搜索功能。下载搜索插件，并启用相关配置项。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;&gt; npm install hexo-generator-search --save</span><br><span class="line">&gt;&gt; npm install hexo-generator-searchdb --save</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim _config.xml</span><br><span class="line">search:</span><br><span class="line">  path: search.xml</span><br><span class="line">  field: post</span><br><span class="line">  format: html</span><br><span class="line">  <span class="built_in">limit</span>: 10000</span><br><span class="line"></span><br><span class="line">&gt;&gt; vim themes/next/_config.yml</span><br><span class="line">local_search:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span></span><br><span class="line">  trigger: auto</span><br><span class="line">  top_n_per_article: 1</span><br><span class="line">  unescape: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>现在，可以进行博客内的标记&amp;全文检索了</p>
+<figure style="text-align:center">
+    <img src="/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/search.png" width="80%">
+</figure>
+
+<h1 id="部署至-Github"><a href="#部署至-Github" class="headerlink" title="部署至 Github"></a>部署至 Github</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>我们采用 GitHub Pages 作为公有网络部署平台，其核心工作原理如下：</p>
+<h3 id="特殊功能的-Github-仓库"><a href="#特殊功能的-Github-仓库" class="headerlink" title="特殊功能的 Github 仓库"></a>特殊功能的 Github 仓库</h3><p>GitHub 将特定命名的代码仓库（格式：<username>.github.io 或<orgname>.github.io）自动识别为 Pages 服务源<br>该仓库 master&#x2F;main 或 gh-pages 分支的内容将被自动发布至 https:&#x2F;&#x2F;<username>.github.io 域名</username></orgname></username></p>
+<h3 id="Hexo-集成机制"><a href="#Hexo-集成机制" class="headerlink" title="Hexo 集成机制"></a>Hexo 集成机制</h3><p>本地 hexo-root 项目通过 git remote 与 GitHub Pages 专用仓库建立关联</p>
+<ol>
+<li>执行 hexo generate：</li>
+</ol>
+<ul>
+<li>生成博客服务的静态文件到 public 目录</li>
+<li>自动注入 GitHub Pages 所需的 CNAME 等配置文件</li>
+</ul>
+<ol start="2">
+<li>执行 hexo deploy：</li>
+</ol>
+<ul>
+<li>通过 hexo-deployer-git 插件将 public 目录内容推送至部署分支</li>
+<li>保留 commit history 的同时更新网站内容</li>
+</ul>
+<h3 id="Github-自动化发布"><a href="#Github-自动化发布" class="headerlink" title="Github 自动化发布"></a>Github 自动化发布</h3><p>GitHub 的构建系统会在检测到该特殊仓库的特定分支更新后，会在 1-3 分钟内完成全球 CDN 节点的博客服务内容分发。我们就可以在 <code>https://&lt;username&gt;.github.io</code> 上看到我们的博客了！</p>
+<h2 id="仓库创建"><a href="#仓库创建" class="headerlink" title="仓库创建"></a>仓库创建</h2><p>创建 git repository: <code>https://github.com/&lt;your username&gt;.github.io</code>。注意两点：</p>
+<ul>
+<li>repository 名一定要为 github 的名字。</li>
+<li>把”Initialize this repository with a README”勾选上。</li>
+</ul>
+<p>此外，若 Github 还没有自动关联本地的密钥，先生成 key pair 并关联 Github 账户，相关教程可参考 <a href="https://www.cnblogs.com/yessn/p/16295806.html">Github 配置 ssh key 的步骤</a></p>
+<h2 id="Hexo-关联仓库"><a href="#Hexo-关联仓库" class="headerlink" title="Hexo 关联仓库"></a>Hexo 关联仓库</h2><p>在配置文件中编辑关联的 Github 仓库</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim _config.yml</span><br><span class="line">deploy:</span><br><span class="line">  <span class="built_in">type</span>: git</span><br><span class="line">  repo: git@github.com:&lt;your-name&gt;/&lt;your-name&gt;.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+
+<h2 id="Deploy"><a href="#Deploy" class="headerlink" title="Deploy"></a>Deploy</h2><p>第一次 deploy，需要先安装 hexo-deployer-git（只第一次 deploy 之前执行）：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+<p>下面就可以 deploy 了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo generate &amp;&amp; hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>和之前所属的原理一致：</p>
+<ul>
+<li>第一条命令：删除本地生成的静态页面；</li>
+<li>第二条命令：根据 source&#x2F;_posts 下面的.md 文件，以及主题等，重新生成静态页面；</li>
+<li>第三条命令：把第二步生成的静态页面上传到 github。</li>
+</ul>
+<p>现在，博客就生成了：http:&#x2F;&#x2F;{your-name}.github.io</p>
+<h1 id="基于-Gitalk-的评论区设置"><a href="#基于-Gitalk-的评论区设置" class="headerlink" title="基于 Gitalk 的评论区设置"></a>基于 Gitalk 的评论区设置</h1><p>调研了一些评论区系统，综合便利性和实用性，考虑选择 <a href="https://github.com/snowdreams1006/hexo-plugin-gitalk">Gitalk</a>。Gitalk 巧妙地将 GitHub Issues 转化为博客评论区！每个博客文章自动创建一个对应的 Issue 作为评论区，完美利用 GitHub Pages 仓库的 Issue 功能（当然你也可以新建专用仓库），非常方便直观，也不需要注册什么别的账户了。</p>
+<h2 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h2><p>安装插件 hexo-plugin-gitalk</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install hexo-plugin-gitalk --save</span><br></pre></td></tr></table></figure>
+
+<h2 id="Github-OAuth-App-创建"><a href="#Github-OAuth-App-创建" class="headerlink" title="Github OAuth App 创建"></a>Github OAuth App 创建</h2><p>Gitalk 本质是通过 GitHub API 与你的仓库交互，而所有第三方应用访问 GitHub 数据都需要<strong>安全授权</strong>。OAuth App 就像是给部署的博客颁发了一张专属「访客卡」，用于身份认证、权限控制和用户安全管理。因此，只有给 OAuth App「访客卡」博客的网址，同时给博客这个 OAuth App 「访客卡」的 client_id 和 clientSecret，博客服务才能调用 Github API 读写仓库的 Issue</p>
+<p>访问 <a href="https://github.com/settings/developers">GitHub Developer Settings</a> → “OAuth Apps” → “New OAuth App”</p>
+<p>填写基本信息，主要包括四项</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Application name: OAuth App的应用名 <span class="comment"># 任意，如Blog Comment或者你的博客名等</span></span><br><span class="line">Homepage URL: 你的博客地址 <span class="comment"># https://username.github.io</span></span><br><span class="line">Application description <span class="comment"># 任意描述</span></span><br><span class="line">Authorization callback URL: 同上 <span class="comment"># https://username.github.io</span></span><br></pre></td></tr></table></figure>
+
+<p><b>创建后记录下<code>Client ID</code>和<code>Client Secret</code>（点击 Generate 生成）</b>，注意 Client Secret 只会展示一次！</p>
+<h2 id="本地配置"><a href="#本地配置" class="headerlink" title="本地配置"></a>本地配置</h2><p>修改或新增 themes&#x2F;next&#x2F;_config.yml 中的 Gitalk 配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gitalk:</span><br><span class="line">  <span class="built_in">enable</span>: <span class="literal">true</span> <span class="comment"># 开启评论</span></span><br><span class="line">  github_id: <span class="string">&quot;你的Github账户名&quot;</span> <span class="comment"># 你的GitHub用户名</span></span><br><span class="line">  repo: <span class="string">&quot;你的仓库名&quot;</span>  <span class="comment"># 如&quot;username.github.io&quot;</span></span><br><span class="line">  clientID: <span class="string">&quot;你的Client ID&quot;</span>  <span class="comment"># ← 必填，OAuth App的Id</span></span><br><span class="line">  clientSecret: <span class="string">&quot;你的Client Secret&quot;</span>  <span class="comment"># ← 必填，OAuth App 生成的Secret key</span></span><br><span class="line">  owner: <span class="string">&quot;GitHub用户名&quot;</span> <span class="comment"># 你的GitHub用户名</span></span><br><span class="line">  admin: [<span class="string">&quot;Github用户名&quot;</span>]  <span class="comment"># 可管理评论的Github账号</span></span><br><span class="line">  distraction_free_mode: <span class="literal">true</span> <span class="comment"># 类 Facebook 的评论区蒙版聚焦模式</span></span><br><span class="line">  proxy: https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token <span class="comment"># 官方 proxy 地址</span></span><br><span class="line">  language: <span class="string">&quot;zh-CN&quot;</span>  <span class="comment"># 支持多语言</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>创建测试文章，然后做评论区测试：</p>
+<ul>
+<li>部署后打开测试文章</li>
+<li>初始化评论区</li>
+<li>首次使用会提示授权 GitHub 登录</li>
+<li>尝试发表测试评论 → 发现其自动在仓库 Issues 生成对应话题，成功持久化评论区</li>
+</ul>
+<p>现在你的博客就拥有一个永不丢失的 GitHub 级评论区啦！🎉</p>
+<h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="评论区-Error"><a href="#评论区-Error" class="headerlink" title="评论区 Error"></a>评论区 Error</h2><h3 id="Error-Bad-credentials"><a href="#Error-Bad-credentials" class="headerlink" title="Error Bad credentials"></a>Error Bad credentials</h3><p>在<a href="https://blog.csdn.net/qq_38463737/article/details/120288329">Gridea 配置 Gitalk 的异常：Error Bad credentials 和 Error Not Found</a>中找到了解决办法。</p>
+<p>原因看起来是 Github 的 OAuth App 要 io username 大小写。我的 Github 的 username 中有大写（SakuraILU.github.io），但浏览器里复制下来的网址是纯小写的（sakurailu.github.io），直接给 copy 到 OAuth App 里了，导致 Github 检索失败。</p>
+<p>修改方法：Edit OAuth App，把里面的 Homepage URL 和 Authorization callback URL 的 username 大小写修正回来。</p>
+<h3 id="Error-Not-Found"><a href="#Error-Not-Found" class="headerlink" title="Error: Not Found"></a>Error: Not Found</h3><p>自己作死，觉着 themes&#x2F;next&#x2F;_config.yml 中的 Gitalk 配置中的 github_id 和 owner 重复了，删了前者，评论区就除了这个错误 hh 可能是 Gitalk 在不同阶段用不同的字段来查找吧，补回来就成。</p>
+<h2 id="屏蔽部分评论区"><a href="#屏蔽部分评论区" class="headerlink" title="屏蔽部分评论区"></a>屏蔽部分评论区</h2><p>注意到 categories、tags 和 about 这些 pages 中存在评论区，很奇怪，需要屏蔽。在<a href="https://blog.csdn.net/Damon___/article/details/79122064">教程</a>中找到了方法，只需要在 source&#x2F;about&#x2F;index.md，source&#x2F;categories&#x2F;index.md，source&#x2F;tags&#x2F;index.md 的 header 中加入 comments: false 条目，这样，这些页面就没有评论区了，对应地，仓库里也没有相应的 Issue</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; vim source/tags/index.md</span><br><span class="line">---</span><br><span class="line">title: tags</span><br><span class="line">date: 2025-05-31 19:31:43</span><br><span class="line">type: &quot;tags&quot;</span><br><span class="line">comments: false # 新增</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>其他普通的 post 同理。</p>
+<h2 id="解决图片无法显示的问题"><a href="#解决图片无法显示的问题" class="headerlink" title="解决图片无法显示的问题"></a>解决图片无法显示的问题</h2><p>博客发布后无法显示图片，很奇怪，于是排查了一阵子。Github 仓库里的代码就是 hexo-root&#x2F;public 中的代码，发现 Post 网页的 index.html 中生成的引用并没有正确索引到图片的地址！hexo generate 后，在本地的 public 文件夹（或者再 hexo deploy 后去 Github 仓库里看），图片的放置的路径在&#x2F;2025&#x2F;06&#x2F;01&#x2F;基于 Github-Hexo 搭建个人博客&#x2F;landscape.png，但对应文章的 index.html 里引用的路径却是&lt;img src&#x3D;”06&#x2F;01&#x2F;%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2&#x2F;landscape.png” width&#x3D;”90%”&gt;。乱码是中文编码的关系，不用管，但很明显的一个问题是生成的路径少了前面的“&#x2F;2025”，当然索引不到了！</p>
+<p>查阅了一些文档，发现有人提到是 hexo-asset-image 的版本问题，重新安装即可解决</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm uninstall hexo-asset-image</span><br><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Blog</category>
+        <category>Tutorial</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>Next主题</tag>
+        <tag>Github Pages</tag>
+      </tags>
+  </entry>
+</search>
