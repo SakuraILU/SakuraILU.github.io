@@ -1,0 +1,59 @@
+<pre><code class="language-mermaid">graph BT
+    %% ========== 应用层（最上层） ==========
+    H[Python深度学习程序]
+
+    %% ========== 框架层 ==========
+    subgraph PyTorch_with_CUDA+cuDNN
+        E[PyTorch]
+        F[CUDA运行时子集]
+        G[cuDNN运行时子集]
+        F1[libcudart.so]
+        G1[libcudnn.so]
+
+        F --&gt;|支持并行运算| E
+        F --&gt;|精简实现| F1
+        G --&gt;|支持深度学习加速| E
+        G --&gt;|优化实现| G1
+        F --&gt;|提供运行时支持| G
+    end
+
+    %% ========== 系统层 ==========
+    subgraph Host_System
+        C[系统CUDA Toolkit]
+        D[系统cuDNN]
+        C1[nvcc]
+        C2[libcudart.so]
+        D1[libcudnn.so]
+        D2[cudnn.h]
+
+        C --&gt;|包含编译器| C1
+        C --&gt;|包含运行时| C2
+        C --&gt;|提供开发/运行时支持| D
+        D --&gt;|包含算法实现| D1
+        D --&gt;|包含开发接口| D2
+    end
+
+    %% ========== 驱动层 ==========
+    B[NVIDIA驱动]
+
+    %% ========== 硬件层（最底层） ==========
+    A[GPU硬件]
+
+    %% ========== 跨层级连接 ==========
+    A --&gt;|提供计算指令集| B
+    B --&gt;|提供底层驱动API| C
+    B --&gt;|提供底层驱动API| F
+    PyTorch_with_CUDA+cuDNN --&gt;|训练/推理调用| H
+    Host_System --&gt;|开发时调用| H
+
+    %% ========== 样式定义 ==========
+    style A fill:#ff9,stroke:#333
+    style B fill:#9cf,stroke:#333
+    style C fill:#c9f,stroke:#333
+    style D fill:#f99,stroke:#333
+    style E fill:#9f9,stroke:#333
+    style F fill:#6f6,stroke:#333
+    style G fill:#f66,stroke:#333
+    style H fill:#f9f,stroke:#333
+
+</code></pre>

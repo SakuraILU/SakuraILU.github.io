@@ -191,6 +191,135 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2025/07/16/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/architecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/citlali.png">
+      <meta itemprop="name" content="木子森">
+      <meta itemprop="description" content="every dog has its day">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木子森的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/07/16/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/architecture/" class="post-title-link" itemprop="url">Untitled</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="Created: 2025-07-16 13:16:53 / Modified: 13:16:55" itemprop="dateCreated datePublished" datetime="2025-07-16T13:16:53+08:00">2025-07-16</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>884</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <pre class="mermaid">graph BT
+    %% ========== 应用层（最上层） ==========
+    H[Python深度学习程序]
+
+    %% ========== 框架层 ==========
+    subgraph PyTorch_with_CUDA+cuDNN
+        E[PyTorch]
+        F[CUDA运行时子集]
+        G[cuDNN运行时子集]
+        F1[libcudart.so]
+        G1[libcudnn.so]
+
+        F -->|支持并行运算| E
+        F -->|精简实现| F1
+        G -->|支持深度学习加速| E
+        G -->|优化实现| G1
+        F -->|提供运行时支持| G
+    end
+
+    %% ========== 系统层 ==========
+    subgraph Host_System
+        C[系统CUDA Toolkit]
+        D[系统cuDNN]
+        C1[nvcc]
+        C2[libcudart.so]
+        D1[libcudnn.so]
+        D2[cudnn.h]
+
+        C -->|包含编译器| C1
+        C -->|包含运行时| C2
+        C -->|提供开发/运行时支持| D
+        D -->|包含算法实现| D1
+        D -->|包含开发接口| D2
+    end
+
+    %% ========== 驱动层 ==========
+    B[NVIDIA驱动]
+
+    %% ========== 硬件层（最底层） ==========
+    A[GPU硬件]
+
+    %% ========== 跨层级连接 ==========
+    A -->|提供计算指令集| B
+    B -->|提供底层驱动API| C
+    B -->|提供底层驱动API| F
+    PyTorch_with_CUDA+cuDNN -->|训练/推理调用| H
+    Host_System -->|开发时调用| H
+
+    %% ========== 样式定义 ==========
+    style A fill:#ff9,stroke:#333
+    style B fill:#9cf,stroke:#333
+    style C fill:#c9f,stroke:#333
+    style D fill:#f99,stroke:#333
+    style E fill:#9f9,stroke:#333
+    style F fill:#6f6,stroke:#333
+    style G fill:#f66,stroke:#333
+    style H fill:#f9f,stroke:#333</pre>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://example.com/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -222,7 +351,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="Modified: 2025-07-16 13:13:16" itemprop="dateModified" datetime="2025-07-16T13:13:16+08:00">2025-07-16</time>
+                <time title="Modified: 2025-07-16 13:16:44" itemprop="dateModified" datetime="2025-07-16T13:16:44+08:00">2025-07-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -244,14 +373,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>9k</span>
+              <span>7.9k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
-              <span>8 mins.</span>
+              <span>7 mins.</span>
             </span>
 
         </div>
@@ -453,7 +582,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
