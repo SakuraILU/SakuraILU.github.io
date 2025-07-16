@@ -13,7 +13,63 @@
 <li>在 CUDA Toolkit 的基础上开发了专门用于加速深度学习网络的 cuDNN。</li>
 <li>深度学习框架（Pytorch&#x2F;Tensorflow 等）依赖 CUDA 的并行运算能力实现大规模训练&#x2F;推理。此外，还可以使用 cuDNN 加速深度网络学习（可选）;</li>
 </ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">graph BT</span><br><span class="line">    %% ========== 应用层（最上层） ==========</span><br><span class="line">    H[Python应用]</span><br><span class="line"></span><br><span class="line">    %% ========== 框架层 ==========</span><br><span class="line">    subgraph PyTorch_with_CUDA+cuDNN</span><br><span class="line">        E[PyTorch]</span><br><span class="line">        F[CUDA运行时子集]</span><br><span class="line">        G[cuDNN运行时子集]</span><br><span class="line">        F1[libcudart.so]</span><br><span class="line">        G1[libcudnn.so]</span><br><span class="line"></span><br><span class="line">        F --&gt;|支持并行运算| E</span><br><span class="line">        F --&gt;|精简实现| F1</span><br><span class="line">        G --&gt;|支持深度学习加速| E</span><br><span class="line">        G --&gt;|优化实现| G1</span><br><span class="line">        F --&gt;|提供运行时支持| G</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    %% ========== 系统层 ==========</span><br><span class="line">    subgraph Host_System</span><br><span class="line">        C[系统CUDA Toolkit]</span><br><span class="line">        D[系统cuDNN]</span><br><span class="line">        C1[nvcc]</span><br><span class="line">        C2[libcudart.so]</span><br><span class="line">        D1[libcudnn.so]</span><br><span class="line">        D2[cudnn.h]</span><br><span class="line"></span><br><span class="line">        C --&gt;|包含编译器| C1</span><br><span class="line">        C --&gt;|包含运行时| C2</span><br><span class="line">        C --&gt;|提供开发/运行时支持| D</span><br><span class="line">        D --&gt;|包含算法实现| D1</span><br><span class="line">        D --&gt;|包含开发接口| D2</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    %% ========== 驱动层 ==========</span><br><span class="line">    B[NVIDIA驱动]</span><br><span class="line"></span><br><span class="line">    %% ========== 硬件层（最底层） ==========</span><br><span class="line">    A[GPU硬件]</span><br><span class="line"></span><br><span class="line">    %% ========== 跨层级连接 ==========</span><br><span class="line">    A --&gt;|提供计算指令集| B</span><br><span class="line">    B --&gt;|提供底层驱动API| C</span><br><span class="line">    B --&gt;|提供底层驱动API| F</span><br><span class="line">    PyTorch_with_CUDA+cuDNN --&gt;|训练/推理调用| H</span><br><span class="line">    Host_System --&gt;|开发时调用| H</span><br><span class="line"></span><br><span class="line">    %% ========== 样式定义 ==========</span><br><span class="line">    style A fill:#ff9,stroke:#333</span><br><span class="line">    style B fill:#9cf,stroke:#333</span><br><span class="line">    style C fill:#c9f,stroke:#333</span><br><span class="line">    style D fill:#f99,stroke:#333</span><br><span class="line">    style E fill:#9f9,stroke:#333</span><br><span class="line">    style F fill:#6f6,stroke:#333</span><br><span class="line">    style G fill:#f66,stroke:#333</span><br><span class="line">    style H fill:#f9f,stroke:#333</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">graph BT
+    %% ========== 应用层（最上层） ==========
+    H[Python应用]
+
+    %% ========== 框架层 ==========
+    subgraph PyTorch_with_CUDA+cuDNN
+        E[PyTorch]
+        F[CUDA运行时子集]
+        G[cuDNN运行时子集]
+        F1[libcudart.so]
+        G1[libcudnn.so]
+
+        F -->|支持并行运算| E
+        F -->|精简实现| F1
+        G -->|支持深度学习加速| E
+        G -->|优化实现| G1
+        F -->|提供运行时支持| G
+    end
+
+    %% ========== 系统层 ==========
+    subgraph Host_System
+        C[系统CUDA Toolkit]
+        D[系统cuDNN]
+        C1[nvcc]
+        C2[libcudart.so]
+        D1[libcudnn.so]
+        D2[cudnn.h]
+
+        C -->|包含编译器| C1
+        C -->|包含运行时| C2
+        C -->|提供开发/运行时支持| D
+        D -->|包含算法实现| D1
+        D -->|包含开发接口| D2
+    end
+
+    %% ========== 驱动层 ==========
+    B[NVIDIA驱动]
+
+    %% ========== 硬件层（最底层） ==========
+    A[GPU硬件]
+
+    %% ========== 跨层级连接 ==========
+    A -->|提供计算指令集| B
+    B -->|提供底层驱动API| C
+    B -->|提供底层驱动API| F
+    PyTorch_with_CUDA+cuDNN -->|训练/推理调用| H
+    Host_System -->|开发时调用| H
+
+    %% ========== 样式定义 ==========
+    style A fill:#ff9,stroke:#333
+    style B fill:#9cf,stroke:#333
+    style C fill:#c9f,stroke:#333
+    style D fill:#f99,stroke:#333
+    style E fill:#9f9,stroke:#333
+    style F fill:#6f6,stroke:#333
+    style G fill:#f66,stroke:#333
+    style H fill:#f9f,stroke:#333</pre>
 
 <p>基于上述思路，GPU，驱动，CUDA，cuDNN 之间的版本确定方法为：GPU 硬件决定驱动版本的上限（有限向后兼容），驱动版本决定了 CuDA Toolkit 的上限（有限向后兼容），CUDA Toolkit 决定了 cuDNN 的上限（有限向后兼容）和 Pytorch 的上限（有限向后兼容）。</p>
 <p>比较幸运是的，自 2020 年起，Pytorch 开始自带了做训练&#x2F;推理所需要的运行时 CUDA Toolkit 和 cuDNN! 妈妈再也不用担心我的版本问题了！不过如果想要自己开发和调试自定义 CUDA 算子等，就得老老实实自己安装系统本机的完整版 CUDA Toolkit（以及 cuDNN）咯。<b>严格来说，本机的 CUDA 和 Pytorch 的 CUDA 没啥依赖关系，所以版本不需要一致，只要满足驱动要求即可。但开发出来的 CUDA 算子总归还是要 Pytorch 跑吧，它用自带的 CUDA 库运行这些算子，最好还是装成一样的 CUDA 版本吧。</b></p>
