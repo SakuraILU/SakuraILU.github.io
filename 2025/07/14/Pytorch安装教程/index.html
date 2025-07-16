@@ -31,7 +31,7 @@
 <meta property="og:image" content="http://example.com/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_cuda.png">
 <meta property="og:image" content="http://example.com/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_pytorch.png">
 <meta property="article:published_time" content="2025-07-14T10:49:00.000Z">
-<meta property="article:modified_time" content="2025-07-16T05:19:08.555Z">
+<meta property="article:modified_time" content="2025-07-16T06:21:08.216Z">
 <meta property="article:author" content="木子森">
 <meta property="article:tag" content="Pytorch">
 <meta property="article:tag" content="Conda">
@@ -232,7 +232,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="Modified: 2025-07-16 13:19:08" itemprop="dateModified" datetime="2025-07-16T13:19:08+08:00">2025-07-16</time>
+                <time title="Modified: 2025-07-16 14:21:08" itemprop="dateModified" datetime="2025-07-16T14:21:08+08:00">2025-07-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -261,7 +261,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
-              <span>7.9k</span>
+              <span>8k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
@@ -293,9 +293,9 @@
 <figure style="text-align:center">
     <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/architecture.png" width="100%">
 </figure>
-<p>基于上述思路，GPU，驱动，CUDA，cuDNN 之间的版本确定方法为：GPU 硬件决定驱动版本的上限（有限向后兼容），驱动版本决定了 CUDA Toolkit 的上限（有限向后兼容），CUDA Toolkit 决定了 cuDNN 的上限（有限向后兼容）和 Pytorch 的上限（有限向后兼容）。</p>
-<p>比较幸运是的，自 2020 年起，Pytorch 开始自带了做训练/推理所需要的 CUDA Toolkit 运行时子集 和 cuDNN 运行时子集! 妈妈再也不用担心我的版本问题了！</p>
-<p>不过如果想要自己开发和调试自定义 CUDA 算子等，就得老老实实自己安装系统本机的完整版 CUDA Toolkit（以及 cuDNN）咯。<b>严格来说，本机的 CUDA 和 Pytorch 的 CUDA 没啥依赖关系，所以版本不需要一致，只要满足驱动要求即可。但开发出来的 CUDA 算子总归还是要 Pytorch 跑吧，它用自带的 CUDA 库运行这些算子，最好还是装成一样的 CUDA 版本吧。</b></p>
+<p>基于上述思路，GPU，驱动，CUDA，cuDNN 之间的版本确定方法为：GPU 硬件决定驱动版本的上限（有限向后兼容），驱动版本决定了 CUDA Toolkit 的上限（有限向后兼容），CUDA Toolkit 决定了 cuDNN 的上限（有限向后兼容）和 Pytorch 的上限（有限向后兼容）。此外，CUDA 和 cuDNN 也有一定的匹配关系，不过一般情况下只要他们都和 CUDA 是版本适配的，他们之间互相还是适配的（注意 check）。</p>
+<p><b>比较幸运是的，自 2020 年起，Pytorch 开始自带了做训练/推理所需要的 CUDA Toolkit 运行时子集 和 cuDNN 运行时子集! </b>妈妈再也不用担心我的版本问题了！</p>
+<p>不过如果想要自己开发和调试自定义 CUDA 算子等，就得老老实实自己安装系统本机的完整版 CUDA Toolkit（以及 cuDNN）咯。<b>严格来说，本机的 CUDA 和 Pytorch 的 CUDA 没啥依赖关系，所以版本不需要一致，只要满足驱动要求即可。但开发出来的 CUDA 算子总归还是要用 Pytorch 跑吧，它用自带的 CUDA 库运行这些算子，所以最好还是装成一样的 CUDA 版本吧。</b></p>
 <p>BUT，虽说我只做做训练/推理，但由于惯性思维，仍然先入为主地花了时间安装系统 CUDA，后来才发现完全不需要 T^T</p>
 <h1>安装 CUDA Toolkit （Optional！）</h1>
 <h2 id="前置条件">前置条件</h2>
