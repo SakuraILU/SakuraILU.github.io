@@ -57,13 +57,14 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">&gt; &gt; nvcc --version</span><br><span class="line">&gt; &gt; nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">&gt; &gt; Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">&gt; &gt; Built on Tue_Feb_27_16:19:38_PST_2024</span><br><span class="line">&gt; &gt; Cuda compilation tools, release 12.4, V12.4.99</span><br><span class="line">&gt; &gt; Build cuda_12.4.r12.4/compiler.33961263_0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h1>基于 Conda 安装 PyTorch（GPU 版）</h1>
 <h2 id="查找适配-CUDA-12-6-的-Pytorch-版本">查找适配 CUDA 12.6 的 Pytorch 版本</h2>
-<p>在<a href="https://pytorch.org/">Pytorch 官网</a>上发现 stable 版本只有 cuda11.8, 12.6, 12.8 的推荐，没有 cuda12.4。但不用担心，Pytorch-cuda126 是指自带了自己需要的 cuda12.6 运行时库的，且基本是大版本兼容的，只要主版本相同即可，即 12.x（eg：安卓 13 的程序可以在安卓 12 的手机上运行，因为它自带了自己所需的安卓 13 的增量库）。安装最接近的 CUDA 12.6 应该是没啥问题的。</p>
+<p>在<a href="https://pytorch.org/">Pytorch 官网</a>上发现 stable 版本只有 cuda11.8, 12.6, 12.8 的推荐，没有 cuda12.4。带有最近的 cuda12.6 的 pytorch 安装命令为<code>pip3 install torch torchvision torchaudio</code>。<b>看这命令，自带 CUDA12.6 的 Pytorch 应该就是默认主流版本了</b>。</p>
 <figure style="text-align:center">
     <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_pytorch.png" width="80%">
 </figure>
-<p>安装命令为<code>pip3 install torch torchvision torchaudio</code>。<b>看这命令，应该支持到 CUDA12.6 的 Pytorch 应该就是默认主流版本了</b>。</p>
 <p>不过，毕竟驱动最高支持 CUDA12.4，Pytorch-cuda126 万一啥时候用到了 CUDA12.6 相对于 12.4 新增的 API 且该 API 依赖驱动的新增功能，到时候出现 error 查起来就蛋疼了。所以，为了避免潜在的兼容性问题，去翻阅<a href="https://pytorch.org/get-started/previous-versions/">历史版本</a>。注意到最近的历史版本 v2.6.0 是有依赖 CUDA12.4 的，相应 pip 安装命令为：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"># CUDA 12.4</span><br><span class="line"></span><br><span class="line">pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>此外，主页里面只说明了 Latest version 的 python&gt;=3.9，历史的版本需要额外查一下，google 一下可以找到<a href="https://pypi.org/project/torch/2.6.0/"> torch v2.6.0 的 pypi 仓库</a>（Release history 里可以找别的版本），在左侧边栏可以看到一个 Meta 信息，说明了 v2.6.0 也是要求 Python&gt;=3.9.0 的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Meta</span><br><span class="line">License: BSD License (BSD-3-Clause)</span><br><span class="line">Author: PyTorch Team</span><br><span class="line">Tagspytorch , machine learning</span><br><span class="line">Requires: Python &gt;=3.9.0</span><br></pre></td></tr></table></figure>
 <h2 id="创建-Conda-环境">创建 Conda 环境</h2>
 <p>Python 库特别杂，各种依赖问题，为了隔离环境，用 Conda 进行虚拟环境隔离。个人比较推荐纯命令行的 miniconda，构建和管理虚拟环境足够用了，安装很简单，参考<a href="https://www.anaconda.com/docs/getting-started/miniconda/install#linux">官方文档<a>。</a></a></p>
 <p>以防万一，创建稍微比 3.9 新一点的 Python3.10 虚拟环境 RL。</p>
