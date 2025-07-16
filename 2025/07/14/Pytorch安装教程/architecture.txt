@@ -1,4 +1,5 @@
-<pre><code class="language-mermaid">graph BT
+```mermaid
+graph BT
     %% ========== 应用层（最上层） ==========
     H[Python深度学习程序]
 
@@ -10,11 +11,11 @@
         F1[libcudart.so]
         G1[libcudnn.so]
 
-        F --&gt;|支持并行运算| E
-        F --&gt;|精简实现| F1
-        G --&gt;|支持深度学习加速| E
-        G --&gt;|优化实现| G1
-        F --&gt;|提供运行时支持| G
+        F -->|支持并行运算| E
+        F -->|精简实现| F1
+        G -->|支持深度学习加速| E
+        G -->|优化实现| G1
+        F -->|提供运行时支持| G
     end
 
     %% ========== 系统层 ==========
@@ -26,11 +27,11 @@
         D1[libcudnn.so]
         D2[cudnn.h]
 
-        C --&gt;|包含编译器| C1
-        C --&gt;|包含运行时| C2
-        C --&gt;|提供开发/运行时支持| D
-        D --&gt;|包含算法实现| D1
-        D --&gt;|包含开发接口| D2
+        C -->|包含编译器| C1
+        C -->|包含运行时| C2
+        C -->|提供开发/运行时支持| D
+        D -->|包含算法实现| D1
+        D -->|包含开发接口| D2
     end
 
     %% ========== 驱动层 ==========
@@ -40,11 +41,11 @@
     A[GPU硬件]
 
     %% ========== 跨层级连接 ==========
-    A --&gt;|提供计算指令集| B
-    B --&gt;|提供底层驱动API| C
-    B --&gt;|提供底层驱动API| F
-    PyTorch_with_CUDA+cuDNN --&gt;|训练/推理调用| H
-    Host_System --&gt;|开发时调用| H
+    A -->|提供计算指令集| B
+    B -->|提供底层驱动API| C
+    B -->|提供底层驱动API| F
+    PyTorch_with_CUDA+cuDNN -->|训练/推理调用| H
+    Host_System -->|开发时调用| H
 
     %% ========== 样式定义 ==========
     style A fill:#ff9,stroke:#333
@@ -56,4 +57,4 @@
     style G fill:#f66,stroke:#333
     style H fill:#f9f,stroke:#333
 
-</code></pre>
+```
