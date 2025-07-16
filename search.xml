@@ -1,162 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Pytorch详细安装教程</title>
-    <url>/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<p>遇到项目需要用到强化学习的内容，自己的系统之前给重装了，Pytorch 没了，重新安装一遍（苦逼）…因为自己以及帮别人前后装过几次，每次都得查来查去，这次决定顺手记录一下从零开始的安装流程，以防万一。</p>
-<span id="more"></span>
-<h1>各组件版本依赖关系</h1>
-<p>基于 GPU 的深度学习的架构是：</p>
-<ol>
-<li>系统底层是支持图像显示和并行运算的 GPU，我们在其上安装了显卡驱动用于读写显卡（一般装系统都会安装，用于图像显示）;</li>
-<li>把显卡驱动的计算能力抽象成了支持并行计算的 CUDA 库;</li>
-<li>在 CUDA Toolkit 的基础上开发了专门用于加速深度学习网络的 cuDNN。</li>
-<li>深度学习框架（Pytorch/Tensorflow 等）依赖 CUDA 的并行运算能力实现大规模训练/推理。此外，还可以使用 cuDNN 加速深度网络学习（可选）;</li>
-</ol>
-<pre class="mermaid">graph BT
-    %% ========== 应用层（最上层） ==========
-    H[Python应用]
-
-    %% ========== 框架层 ==========
-    subgraph PyTorch_with_CUDA+cuDNN
-        E[PyTorch]
-        F[CUDA运行时子集]
-        G[cuDNN运行时子集]
-        F1[libcudart.so]
-        G1[libcudnn.so]
-
-        F -->|支持并行运算| E
-        F -->|精简实现| F1
-        G -->|支持深度学习加速| E
-        G -->|优化实现| G1
-        F -->|提供运行时支持| G
-    end
-
-    %% ========== 系统层 ==========
-    subgraph Host_System
-        C[系统CUDA Toolkit]
-        D[系统cuDNN]
-        C1[nvcc]
-        C2[libcudart.so]
-        D1[libcudnn.so]
-        D2[cudnn.h]
-
-        C -->|包含编译器| C1
-        C -->|包含运行时| C2
-        C -->|提供开发/运行时支持| D
-        D -->|包含算法实现| D1
-        D -->|包含开发接口| D2
-    end
-
-    %% ========== 驱动层 ==========
-    B[NVIDIA驱动]
-
-    %% ========== 硬件层（最底层） ==========
-    A[GPU硬件]
-
-    %% ========== 跨层级连接 ==========
-    A -->|提供计算指令集| B
-    B -->|提供底层驱动API| C
-    B -->|提供底层驱动API| F
-    PyTorch_with_CUDA+cuDNN -->|训练/推理调用| H
-    Host_System -->|开发时调用| H
-
-    %% ========== 样式定义 ==========
-    style A fill:#ff9,stroke:#333
-    style B fill:#9cf,stroke:#333
-    style C fill:#c9f,stroke:#333
-    style D fill:#f99,stroke:#333
-    style E fill:#9f9,stroke:#333
-    style F fill:#6f6,stroke:#333
-    style G fill:#f66,stroke:#333
-    style H fill:#f9f,stroke:#333</pre>
-<p>基于上述思路，GPU，驱动，CUDA，cuDNN 之间的版本确定方法为：GPU 硬件决定驱动版本的上限（有限向后兼容），驱动版本决定了 CUDA Toolkit 的上限（有限向后兼容），CUDA Toolkit 决定了 cuDNN 的上限（有限向后兼容）和 Pytorch 的上限（有限向后兼容）。</p>
-<p>比较幸运是的，自 2020 年起，Pytorch 开始自带了做训练/推理所需要的 CUDA Toolkit 运行时子集 和 cuDNN 运行时子集! 妈妈再也不用担心我的版本问题了！</p>
-<p>不过如果想要自己开发和调试自定义 CUDA 算子等，就得老老实实自己安装系统本机的完整版 CUDA Toolkit（以及 cuDNN）咯。<b>严格来说，本机的 CUDA 和 Pytorch 的 CUDA 没啥依赖关系，所以版本不需要一致，只要满足驱动要求即可。但开发出来的 CUDA 算子总归还是要 Pytorch 跑吧，它用自带的 CUDA 库运行这些算子，最好还是装成一样的 CUDA 版本吧。</b></p>
-<p>BUT，虽说我只做做训练/推理，但由于惯性思维，仍然先入为主地花了时间安装系统 CUDA，后来才发现完全不需要 T^T</p>
-<h1>安装 CUDA Toolkit （Optional！）</h1>
-<h2 id="前置条件">前置条件</h2>
-<p>本机的状况：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; uname -a （指令集架构）</span><br><span class="line">Linux lky-laptop 6.8.0-55-generic #57-Ubuntu SMP PREEMPT_DYNAMIC Wed Feb 12 23:42:21 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux</span><br><span class="line"></span><br><span class="line">&gt;&gt; lsb_release -a （系统版本）</span><br><span class="line">No LSB modules are available.</span><br><span class="line">Distributor ID:	Linuxmint</span><br><span class="line">Description:	Linux Mint 22.1</span><br><span class="line">Release:	22.1</span><br><span class="line">Codename:	xia</span><br><span class="line"></span><br><span class="line">&gt;&gt; nvidia-smi （GPU驱动支持的CUDA版本）</span><br><span class="line">Mon Jul 14 18:56:44 2025</span><br><span class="line">+-----------------------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 550.120                Driver Version: 550.120        CUDA Version: 12.4     |</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>可以看到，电脑是 x86-64 指令集架构，OS 是 Linux Mint 22.1 (对应 Ubuntu 22.04)，显卡驱动<b>最高支持到 CUDA 12.4</b></p>
-<p>如果没有安装 CUDA，请查询相关教程。Linux Mint 系统安装的时候记得有自动安装 NVdia 显卡驱动，自己应该是那时候装上的。</p>
-<h2 id="安装-Toolkit">安装 Toolkit</h2>
-<p>进入<a href="https://developer.nvidia.com/cuda-toolkit-archive">NVdia 官网</a>，可以看到所有历史版本的 CUDA Toolkit（包括最新和旧版）。找到目标版本 CUDA Toolkit 12.4，进入安装页面。</p>
-<p>按<a href="#前置条件">前文</a>查到的系统类型选择，Linux-x86-64-Ubuntu-22.04，选择 local 安装。</p>
-<figure style="text-align:center">
-    <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_cuda.png" width="80%">
-</figure>
-<p>页面下方给出了一堆安装命令，全部执行即可。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin</span><br><span class="line">sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600</span><br><span class="line">wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo dpkg -i cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo cp /var/cuda-repo-ubuntu2204-12-4-local/cuda-*-keyring.gpg /usr/share/keyrings/</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get -y install cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
-<h2 id="问题排查：APT-无法-locate-CUDA-Toolkit">问题排查：APT 无法 locate CUDA Toolkit</h2>
-<p>安装的时候遇到了一些问题，执行最后一条命令的时候遇到了</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; sudo apt-get -y install cuda-toolkit-12-4</span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree... Done</span><br><span class="line">Reading state information... Done</span><br><span class="line">E: Unable to locate package cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
-<p>重新执行了几次上述一堆命令，仍然无效 T^T</p>
-<p>为了排解问题，首先看看 apt 里有哪儿些 cuda 相关的包。于是我输入 <code>sudo apt install -y cuda- </code>后，按 Tab 键进行自动补全提示（oh-my-zsh 的很方便的一个插件），得到</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; sudo apt install -y cuda-[键入Tab]</span><br><span class="line">sudo apt install -y cuda-[进行tab提示]</span><br><span class="line">cuda-drivers-fabricmanager-450 cuda-drivers-fabricmanager-535</span><br><span class="line">cuda-drivers-fabricmanager-460 cuda-drivers-fabricmanager-550</span><br><span class="line">cuda-drivers-fabricmanager-470 cuda-drivers-fabricmanager-565</span><br><span class="line">cuda-drivers-fabricmanager-510 cuda-drivers-fabricmanager-570</span><br><span class="line">cuda-drivers-fabricmanager-515 cuda-repo-ubuntu2204-12-4-local</span><br><span class="line">cuda-drivers-fabricmanager-525</span><br></pre></td></tr></table></figure>
-<p>只有如上全部内容，可以看到没有 cuda toolkit 的包，但奇怪的是，有一堆 cuda-dirvers 和一个<b>cuda-repo-ubuntu2204-12-4-local</b>，感觉 CUDA 仓库加载了但没完全加载…</p>
-<p>不管咋说，之后重新搞，总得先把现在这个半残仓库清除掉，不然旧仓库可能会和新仓库产生优先级冲突，此外 apt update 也有可能仍使用旧缓存，找不到新包…执行如下命令进行清除</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## 清理旧仓库</span><br><span class="line">sudo dpkg -P cuda-repo-ubuntu2204-12-4-local  # 卸载旧仓库包</span><br><span class="line">sudo rm -rf /var/cuda-repo-*                  # 删除残留元数据</span><br><span class="line"></span><br><span class="line">## 强制刷新 APT 缓存</span><br><span class="line">sudo apt clean                # 清理下载的 .deb 缓存</span><br><span class="line">sudo rm -rf /var/lib/apt/lists/*  # 删除所有仓库缓存</span><br><span class="line">sudo apt update               # 强制重新加载仓库</span><br></pre></td></tr></table></figure>
-<p>接下来，重新执行官方安装命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin</span><br><span class="line">sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600</span><br><span class="line">wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo dpkg -i cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo cp /var/cuda-repo-ubuntu2204-12-4-local/cuda-*-keyring.gpg /usr/share/keyrings/</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get -y install cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
-<p>这下成功了…!真是奇怪的问题。</p>
-<p>不过发现命令行还是找不到 nvcc，怀疑是路径问题，查了一下，nvcc 是被安装/usr/local/cuda-12.4/bin/nvcc 下面，执行</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; /usr/local/cuda-12.4/bin/nvcc --version</span><br><span class="line">nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">Built on Tue_Feb_27_16:19:38_PST_2024</span><br><span class="line">Cuda compilation tools, release 12.4, V12.4.99</span><br><span class="line">Build cuda_12.4.r12.4/compiler.33961263_0</span><br></pre></td></tr></table></figure>
-<p>ok!</p>
-<p>于是应该只需要添加路径到 PATH 即可，不过安全起见，看看下载好 nvcc 后到底有哪儿些设置。查阅<a href="https://www.cnblogs.com/gishuanhuan/p/17682644.html">网络</a>后发现除了 PATH，还需要设置 LD_LIBRARY_PATH</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export CUDA_HOME=/usr/local/cuda-12.4</span><br><span class="line">export PATH=$&#123;CUDA_HOME&#125;/bin:$PATH # OS检索可执行文件的路径</span><br><span class="line">export LD_LIBRARY_PATH=$&#123;CUDA_HOME&#125;/lib64:$PATH # ld.so检索动态链接库的路径</span><br></pre></td></tr></table></figure>
-<p>那 LD_LIBRARY_PATH 是什么？想起以前 OS 课讲动态链接的时候提到过，是 <a href="https://man7.org/linux/man-pages/man8/ld.so.8.html">ld.so （动态连接器）</a> <a href="http://xn--6fr40zm5a0yehxbt5f99d703gzeobhm.so">运行时查找动态链接库.so</a> 的时候要用的，也就是动态链接库路径，基于 CUDA 的程序（比如深度学习库 PyTorch/TensorFlow 等）在运行时依赖 lib64 <a href="http://xn--ghqq00hg2v.so">下面的.so</a> 库。看一看 lib64 下面的内容就知道了</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; ls /usr/local/cuda-12.4/lib64</span><br><span class="line">cmake                         libnppial.so.12</span><br><span class="line">libOpenCL.so                  libnppial.so.12.2.5.2</span><br><span class="line">libOpenCL.so.1                libnppial_static.a</span><br><span class="line">libOpenCL.so.1.0              libnppicc.so</span><br><span class="line">libOpenCL.so.1.0.0            libnppicc.so.12</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>至此，命令行可以键入 nvcc，<a href="http://ld.so">ld.so</a> 也可以加载 cuda 动态库了，cuda toolkit 安装完毕</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; nvcc --version</span><br><span class="line">nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">Built on Tue_Feb_27_16:19:38_PST_2024</span><br><span class="line">Cuda compilation tools, release 12.4, V12.4.99</span><br><span class="line">Build cuda_12.4.r12.4/compiler.33961263_0</span><br></pre></td></tr></table></figure>
-<h1>基于 Conda 安装 PyTorch（GPU 版）</h1>
-<h2 id="查找适配-CUDA-12-6-的-Pytorch-版本">查找适配 CUDA 12.6 的 Pytorch 版本</h2>
-<p>在<a href="https://pytorch.org/">Pytorch 官网</a>上发现 stable 版本只有 cuda11.8, 12.6, 12.8 的推荐，没有 cuda12.4。但不用担心，Pytorch-cuda126 是指自带了自己需要的 cuda12.6 运行时库的，且基本是大版本兼容的，只要主版本相同即可，即 12.x（eg：安卓 13 的程序可以在安卓 12 的手机上运行，因为它自带了自己所需的安卓 13 的增量库）。安装最接近的 CUDA 12.6 应该是没啥问题的。</p>
-<figure style="text-align:center">
-    <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_pytorch.png" width="80%">
-</figure>
-<p>安装命令为<code>pip3 install torch torchvision torchaudio</code>。<b>看这命令，应该支持到 CUDA12.6 的 Pytorch 应该就是默认主流版本了</b>。</p>
-<p>不过，毕竟驱动最高支持 CUDA12.4，Pytorch-cuda126 万一啥时候用到了 CUDA12.6 相对于 12.4 新增的 API 且该 API 依赖驱动的新增功能，到时候出现 error 查起来就蛋疼了。所以，为了避免潜在的兼容性问题，去翻阅<a href="https://pytorch.org/get-started/previous-versions/">历史版本</a>。注意到最近的历史版本 v2.6.0 是有依赖 CUDA12.4 的，相应 pip 安装命令为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"># CUDA 12.4</span><br><span class="line">pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<h2 id="创建-Conda-环境">创建 Conda 环境</h2>
-<p>Python 库特别杂，各种依赖问题，为了隔离环境，用 Conda 进行虚拟环境隔离。个人比较推荐纯命令行的 miniconda，构建和管理虚拟环境足够用了，安装很简单，参考<a href="https://www.anaconda.com/docs/getting-started/miniconda/install#linux">官方文档<a>。</a></a></p>
-<p>以防万一，创建稍微比 3.9 新一点的 Python3.10 虚拟环境 RL。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; conda create -n RL python=3.10</span><br><span class="line"></span><br><span class="line">&gt;&gt; python --version</span><br><span class="line">Python 3.10.18</span><br></pre></td></tr></table></figure>
-<p>激活环境并根据<a href="#查找适配 CUDA 12.6 的 Pytorch 版本">前文</a>确定的 Pytorch 版本安装 Pytorch</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; conda activate RL</span><br><span class="line">&gt;&gt; (RL) pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124</span><br></pre></td></tr></table></figure>
-<p>安装过程比较漫长，慢慢等吧…</p>
-<h2 id="相关验证">相关验证</h2>
-<h3 id="PyTorch-是否成功安装">PyTorch 是否成功安装</h3>
-<p>完成后，键入如下命令查看 torch 及其版本</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; (RL) python</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; print(torch.__version__)</span><br><span class="line">2.6.0+cu124</span><br></pre></td></tr></table></figure>
-<p>安装了依赖 cuda12.4 的 torch2.7.0</p>
-<p>至此，我们安装了 GPU 驱动（Version: 550.144.03）+ CUDA（Version: 12.4）+ Python(Version: 3.10.18) + Pytorch（Version: 2.6.0+cuda124）。</p>
-<h3 id="验证-GPU-是否可用">验证 GPU 是否可用</h3>
-<p>运行以下代码检查 PyTorch 能否调用 CUDA 访问 GPU</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; (RL) python</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.is_available())  # 检查 CUDA 是否可用（True 表示 GPU 可用）</span><br><span class="line">True</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.device_count())  # 显示可用 GPU 数量</span><br><span class="line">1</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.get_device_name(0))  # 输出第 1 块 GPU 的名称（如 &quot;NVIDIA RTX 3090&quot;）</span><br><span class="line">NVIDIA GeForce RTX 3060 Laptop GPU</span><br></pre></td></tr></table></figure>
-<h3 id="检查-CUDA-版本">检查 CUDA 版本</h3>
-<p>运行以下代码查看 PyTorch 支持到的 CUDA 版本：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; print(torch.version.cuda)  # 输出 PyTorch 使用的 CUDA 版本</span><br><span class="line">&gt;&gt;&gt; print(torch.version.cuda)</span><br><span class="line">12.4</span><br></pre></td></tr></table></figure>
-<h3 id="验证-cuDNN-是否可用">验证 cuDNN 是否可用</h3>
-<p>cuDNN（CUDA Deep Neural Network library）是深度学习加速库，专门用于优化 GPU 上的深度神经网络计算（如卷积、池化、LSTM 等），是 CUDA 生态的重要组成部分。记得以前安装的时候还需要手动从官网下载，版本对应也怪麻烦的，没想到现在官方在预编译的 PyTorch 二进制包（pip/conda 安装） 中直接集成了 对应版本的 cuDNN，太妙了。查了以下，应该是从 PyTorch 1.6 版本开始的。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; print(torch.backends.cudnn.version())  # 输出 cuDNN 版本</span><br><span class="line">90100</span><br><span class="line">print(torch.backends.cudnn.is_available())  # 检查 cuDNN 是否可用</span><br><span class="line">True</span><br></pre></td></tr></table></figure>
-<h3 id="运行一个小型-GPU-测试">运行一个小型 GPU 测试</h3>
-<p>最后，用以下脚本启用 cuDNN, 用 cuda 在 GPU 上跑个卷积层看看。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import torch</span><br><span class="line"></span><br><span class="line"># 启用 cuDNN 加速</span><br><span class="line">torch.backends.cudnn.enabled = True</span><br><span class="line"></span><br><span class="line"># 构造一个卷积操作（会调用 cuDNN）</span><br><span class="line">input_data = torch.randn(1, 3, 32, 32).cuda()  # [batch, channel, height, width]</span><br><span class="line">conv_layer = torch.nn.Conv2d(3, 64, kernel_size=3).cuda()  # 输入通道3，输出通道64</span><br><span class="line">output = conv_layer(input_data)  # 此操作会调用 cuDNN</span><br><span class="line"></span><br><span class="line">print(output.shape)  # 输出形状 [1, 64, 30, 30]</span><br><span class="line"></span><br><span class="line">---------------------------------</span><br><span class="line">out: torch.Size([1, 64, 30, 30])</span><br></pre></td></tr></table></figure>
-<p>如果代码正常运行，说明 PyTorch + CUDA + cuDNN + GPU 全部可用。</p>
-]]></content>
-      <categories>
-        <category>Pytorch</category>
-        <category>tutorial</category>
-      </categories>
-      <tags>
-        <tag>Pytorch</tag>
-        <tag>Conda</tag>
-        <tag>DeepLearning</tag>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于Github+Hexo搭建个人博客</title>
     <url>/2025/06/01/%E5%9F%BA%E4%BA%8EGithub-Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<p>为了养成经常做学习记录的习惯，花了一些时间利用 Hexo+next+Github Pages 搭建了一个简易的个人博客。这个搭建过程正好作为第一篇博客。</p>
@@ -380,6 +224,162 @@
         <tag>Hexo</tag>
         <tag>Next主题</tag>
         <tag>Github Pages</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Pytorch详细安装教程</title>
+    <url>/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>遇到项目需要用到强化学习的内容，自己的系统之前给重装了，Pytorch 没了，重新安装一遍（苦逼）…因为自己以及帮别人前后装过几次，每次都得查来查去，这次决定顺手记录一下从零开始的安装流程，以防万一。</p>
+<span id="more"></span>
+<h1>各组件版本依赖关系</h1>
+<p>基于 GPU 的深度学习的架构是：</p>
+<ol>
+<li>系统底层是支持图像显示和并行运算的 GPU，我们在其上安装了显卡驱动用于读写显卡（一般装系统都会安装，用于图像显示）;</li>
+<li>把显卡驱动的计算能力抽象成了支持并行计算的 CUDA 库;</li>
+<li>在 CUDA Toolkit 的基础上开发了专门用于加速深度学习网络的 cuDNN。</li>
+<li>深度学习框架（Pytorch/Tensorflow 等）依赖 CUDA 的并行运算能力实现大规模训练/推理。此外，还可以使用 cuDNN 加速深度网络学习（可选）;</li>
+</ol>
+<pre class="mermaid">graph BT
+    %% ========== 应用层（最上层） ==========
+    H[Python应用]
+
+    %% ========== 框架层 ==========
+    subgraph PyTorch_with_CUDA+cuDNN
+        E[PyTorch]
+        F[CUDA运行时子集]
+        G[cuDNN运行时子集]
+        F1[libcudart.so]
+        G1[libcudnn.so]
+
+        F -->|支持并行运算| E
+        F -->|精简实现| F1
+        G -->|支持深度学习加速| E
+        G -->|优化实现| G1
+        F -->|提供运行时支持| G
+    end
+
+    %% ========== 系统层 ==========
+    subgraph Host_System
+        C[系统CUDA Toolkit]
+        D[系统cuDNN]
+        C1[nvcc]
+        C2[libcudart.so]
+        D1[libcudnn.so]
+        D2[cudnn.h]
+
+        C -->|包含编译器| C1
+        C -->|包含运行时| C2
+        C -->|提供开发/运行时支持| D
+        D -->|包含算法实现| D1
+        D -->|包含开发接口| D2
+    end
+
+    %% ========== 驱动层 ==========
+    B[NVIDIA驱动]
+
+    %% ========== 硬件层（最底层） ==========
+    A[GPU硬件]
+
+    %% ========== 跨层级连接 ==========
+    A -->|提供计算指令集| B
+    B -->|提供底层驱动API| C
+    B -->|提供底层驱动API| F
+    PyTorch_with_CUDA+cuDNN -->|训练/推理调用| H
+    Host_System -->|开发时调用| H
+
+    %% ========== 样式定义 ==========
+    style A fill:#ff9,stroke:#333
+    style B fill:#9cf,stroke:#333
+    style C fill:#c9f,stroke:#333
+    style D fill:#f99,stroke:#333
+    style E fill:#9f9,stroke:#333
+    style F fill:#6f6,stroke:#333
+    style G fill:#f66,stroke:#333
+    style H fill:#f9f,stroke:#333</pre>
+<p>基于上述思路，GPU，驱动，CUDA，cuDNN 之间的版本确定方法为：GPU 硬件决定驱动版本的上限（有限向后兼容），驱动版本决定了 CUDA Toolkit 的上限（有限向后兼容），CUDA Toolkit 决定了 cuDNN 的上限（有限向后兼容）和 Pytorch 的上限（有限向后兼容）。</p>
+<p>比较幸运是的，自 2020 年起，Pytorch 开始自带了做训练/推理所需要的 CUDA Toolkit 运行时子集 和 cuDNN 运行时子集! 妈妈再也不用担心我的版本问题了！</p>
+<p>不过如果想要自己开发和调试自定义 CUDA 算子等，就得老老实实自己安装系统本机的完整版 CUDA Toolkit（以及 cuDNN）咯。<b>严格来说，本机的 CUDA 和 Pytorch 的 CUDA 没啥依赖关系，所以版本不需要一致，只要满足驱动要求即可。但开发出来的 CUDA 算子总归还是要 Pytorch 跑吧，它用自带的 CUDA 库运行这些算子，最好还是装成一样的 CUDA 版本吧。</b></p>
+<p>BUT，虽说我只做做训练/推理，但由于惯性思维，仍然先入为主地花了时间安装系统 CUDA，后来才发现完全不需要 T^T</p>
+<h1>安装 CUDA Toolkit （Optional！）</h1>
+<h2 id="前置条件">前置条件</h2>
+<p>本机的状况：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; uname -a （指令集架构）</span><br><span class="line">Linux lky-laptop 6.8.0-55-generic #57-Ubuntu SMP PREEMPT_DYNAMIC Wed Feb 12 23:42:21 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux</span><br><span class="line"></span><br><span class="line">&gt;&gt; lsb_release -a （系统版本）</span><br><span class="line">No LSB modules are available.</span><br><span class="line">Distributor ID:	Linuxmint</span><br><span class="line">Description:	Linux Mint 22.1</span><br><span class="line">Release:	22.1</span><br><span class="line">Codename:	xia</span><br><span class="line"></span><br><span class="line">&gt;&gt; nvidia-smi （GPU驱动支持的CUDA版本）</span><br><span class="line">Mon Jul 14 18:56:44 2025</span><br><span class="line">+-----------------------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 550.120                Driver Version: 550.120        CUDA Version: 12.4     |</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>可以看到，电脑是 x86-64 指令集架构，OS 是 Linux Mint 22.1 (对应 Ubuntu 22.04)，显卡驱动<b>最高支持到 CUDA 12.4</b></p>
+<p>如果没有安装 CUDA，请查询相关教程。Linux Mint 系统安装的时候记得有自动安装 NVdia 显卡驱动，自己应该是那时候装上的。</p>
+<h2 id="安装-Toolkit">安装 Toolkit</h2>
+<p>进入<a href="https://developer.nvidia.com/cuda-toolkit-archive">NVdia 官网</a>，可以看到所有历史版本的 CUDA Toolkit（包括最新和旧版）。找到目标版本 CUDA Toolkit 12.4，进入安装页面。</p>
+<p>按<a href="#前置条件">前文</a>查到的系统类型选择，Linux-x86-64-Ubuntu-22.04，选择 local 安装。</p>
+<figure style="text-align:center">
+    <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_cuda.png" width="80%">
+</figure>
+<p>页面下方给出了一堆安装命令，全部执行即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin</span><br><span class="line">sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600</span><br><span class="line">wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo dpkg -i cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo cp /var/cuda-repo-ubuntu2204-12-4-local/cuda-*-keyring.gpg /usr/share/keyrings/</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get -y install cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
+<h2 id="问题排查：APT-无法-locate-CUDA-Toolkit">问题排查：APT 无法 locate CUDA Toolkit</h2>
+<p>安装的时候遇到了一些问题，执行最后一条命令的时候遇到了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; sudo apt-get -y install cuda-toolkit-12-4</span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree... Done</span><br><span class="line">Reading state information... Done</span><br><span class="line">E: Unable to locate package cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
+<p>重新执行了几次上述一堆命令，仍然无效 T^T</p>
+<p>为了排解问题，首先看看 apt 里有哪儿些 cuda 相关的包。于是我输入 <code>sudo apt install -y cuda- </code>后，按 Tab 键进行自动补全提示（oh-my-zsh 的很方便的一个插件），得到</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; sudo apt install -y cuda-[键入Tab]</span><br><span class="line">sudo apt install -y cuda-[进行tab提示]</span><br><span class="line">cuda-drivers-fabricmanager-450 cuda-drivers-fabricmanager-535</span><br><span class="line">cuda-drivers-fabricmanager-460 cuda-drivers-fabricmanager-550</span><br><span class="line">cuda-drivers-fabricmanager-470 cuda-drivers-fabricmanager-565</span><br><span class="line">cuda-drivers-fabricmanager-510 cuda-drivers-fabricmanager-570</span><br><span class="line">cuda-drivers-fabricmanager-515 cuda-repo-ubuntu2204-12-4-local</span><br><span class="line">cuda-drivers-fabricmanager-525</span><br></pre></td></tr></table></figure>
+<p>只有如上全部内容，可以看到没有 cuda toolkit 的包，但奇怪的是，有一堆 cuda-dirvers 和一个<b>cuda-repo-ubuntu2204-12-4-local</b>，感觉 CUDA 仓库加载了但没完全加载…</p>
+<p>不管咋说，之后重新搞，总得先把现在这个半残仓库清除掉，不然旧仓库可能会和新仓库产生优先级冲突，此外 apt update 也有可能仍使用旧缓存，找不到新包…执行如下命令进行清除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">## 清理旧仓库</span><br><span class="line">sudo dpkg -P cuda-repo-ubuntu2204-12-4-local  # 卸载旧仓库包</span><br><span class="line">sudo rm -rf /var/cuda-repo-*                  # 删除残留元数据</span><br><span class="line"></span><br><span class="line">## 强制刷新 APT 缓存</span><br><span class="line">sudo apt clean                # 清理下载的 .deb 缓存</span><br><span class="line">sudo rm -rf /var/lib/apt/lists/*  # 删除所有仓库缓存</span><br><span class="line">sudo apt update               # 强制重新加载仓库</span><br></pre></td></tr></table></figure>
+<p>接下来，重新执行官方安装命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin</span><br><span class="line">sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600</span><br><span class="line">wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo dpkg -i cuda-repo-ubuntu2204-12-4-local_12.4.0-550.54.14-1_amd64.deb</span><br><span class="line">sudo cp /var/cuda-repo-ubuntu2204-12-4-local/cuda-*-keyring.gpg /usr/share/keyrings/</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get -y install cuda-toolkit-12-4</span><br></pre></td></tr></table></figure>
+<p>这下成功了…!真是奇怪的问题。</p>
+<p>不过发现命令行还是找不到 nvcc，怀疑是路径问题，查了一下，nvcc 是被安装/usr/local/cuda-12.4/bin/nvcc 下面，执行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; /usr/local/cuda-12.4/bin/nvcc --version</span><br><span class="line">nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">Built on Tue_Feb_27_16:19:38_PST_2024</span><br><span class="line">Cuda compilation tools, release 12.4, V12.4.99</span><br><span class="line">Build cuda_12.4.r12.4/compiler.33961263_0</span><br></pre></td></tr></table></figure>
+<p>ok!</p>
+<p>于是应该只需要添加路径到 PATH 即可，不过安全起见，看看下载好 nvcc 后到底有哪儿些设置。查阅<a href="https://www.cnblogs.com/gishuanhuan/p/17682644.html">网络</a>后发现除了 PATH，还需要设置 LD_LIBRARY_PATH</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">export CUDA_HOME=/usr/local/cuda-12.4</span><br><span class="line">export PATH=$&#123;CUDA_HOME&#125;/bin:$PATH # OS检索可执行文件的路径</span><br><span class="line">export LD_LIBRARY_PATH=$&#123;CUDA_HOME&#125;/lib64:$PATH # ld.so检索动态链接库的路径</span><br></pre></td></tr></table></figure>
+<p>那 LD_LIBRARY_PATH 是什么？想起以前 OS 课讲动态链接的时候提到过，是 <a href="https://man7.org/linux/man-pages/man8/ld.so.8.html">ld.so （动态连接器）</a> <a href="http://xn--6fr40zm5a0yehxbt5f99d703gzeobhm.so">运行时查找动态链接库.so</a> 的时候要用的，也就是动态链接库路径，基于 CUDA 的程序（比如深度学习库 PyTorch/TensorFlow 等）在运行时依赖 lib64 <a href="http://xn--ghqq00hg2v.so">下面的.so</a> 库。看一看 lib64 下面的内容就知道了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; ls /usr/local/cuda-12.4/lib64</span><br><span class="line">cmake                         libnppial.so.12</span><br><span class="line">libOpenCL.so                  libnppial.so.12.2.5.2</span><br><span class="line">libOpenCL.so.1                libnppial_static.a</span><br><span class="line">libOpenCL.so.1.0              libnppicc.so</span><br><span class="line">libOpenCL.so.1.0.0            libnppicc.so.12</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>至此，命令行可以键入 nvcc，<a href="http://ld.so">ld.so</a> 也可以加载 cuda 动态库了，cuda toolkit 安装完毕</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; nvcc --version</span><br><span class="line">nvcc: NVIDIA (R) Cuda compiler driver</span><br><span class="line">Copyright (c) 2005-2024 NVIDIA Corporation</span><br><span class="line">Built on Tue_Feb_27_16:19:38_PST_2024</span><br><span class="line">Cuda compilation tools, release 12.4, V12.4.99</span><br><span class="line">Build cuda_12.4.r12.4/compiler.33961263_0</span><br></pre></td></tr></table></figure>
+<h1>基于 Conda 安装 PyTorch（GPU 版）</h1>
+<h2 id="查找适配-CUDA-12-6-的-Pytorch-版本">查找适配 CUDA 12.6 的 Pytorch 版本</h2>
+<p>在<a href="https://pytorch.org/">Pytorch 官网</a>上发现 stable 版本只有 cuda11.8, 12.6, 12.8 的推荐，没有 cuda12.4。但不用担心，Pytorch-cuda126 是指自带了自己需要的 cuda12.6 运行时库的，且基本是大版本兼容的，只要主版本相同即可，即 12.x（eg：安卓 13 的程序可以在安卓 12 的手机上运行，因为它自带了自己所需的安卓 13 的增量库）。安装最接近的 CUDA 12.6 应该是没啥问题的。</p>
+<figure style="text-align:center">
+    <img src="/2025/07/14/Pytorch%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B/install_pytorch.png" width="80%">
+</figure>
+<p>安装命令为<code>pip3 install torch torchvision torchaudio</code>。<b>看这命令，应该支持到 CUDA12.6 的 Pytorch 应该就是默认主流版本了</b>。</p>
+<p>不过，毕竟驱动最高支持 CUDA12.4，Pytorch-cuda126 万一啥时候用到了 CUDA12.6 相对于 12.4 新增的 API 且该 API 依赖驱动的新增功能，到时候出现 error 查起来就蛋疼了。所以，为了避免潜在的兼容性问题，去翻阅<a href="https://pytorch.org/get-started/previous-versions/">历史版本</a>。注意到最近的历史版本 v2.6.0 是有依赖 CUDA12.4 的，相应 pip 安装命令为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"># CUDA 12.4</span><br><span class="line">pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h2 id="创建-Conda-环境">创建 Conda 环境</h2>
+<p>Python 库特别杂，各种依赖问题，为了隔离环境，用 Conda 进行虚拟环境隔离。个人比较推荐纯命令行的 miniconda，构建和管理虚拟环境足够用了，安装很简单，参考<a href="https://www.anaconda.com/docs/getting-started/miniconda/install#linux">官方文档<a>。</a></a></p>
+<p>以防万一，创建稍微比 3.9 新一点的 Python3.10 虚拟环境 RL。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; conda create -n RL python=3.10</span><br><span class="line"></span><br><span class="line">&gt;&gt; python --version</span><br><span class="line">Python 3.10.18</span><br></pre></td></tr></table></figure>
+<p>激活环境并根据<a href="#查找适配 CUDA 12.6 的 Pytorch 版本">前文</a>确定的 Pytorch 版本安装 Pytorch</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; conda activate RL</span><br><span class="line">&gt;&gt; (RL) pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124</span><br></pre></td></tr></table></figure>
+<p>安装过程比较漫长，慢慢等吧…</p>
+<h2 id="相关验证">相关验证</h2>
+<h3 id="PyTorch-是否成功安装">PyTorch 是否成功安装</h3>
+<p>完成后，键入如下命令查看 torch 及其版本</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; (RL) python</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; print(torch.__version__)</span><br><span class="line">2.6.0+cu124</span><br></pre></td></tr></table></figure>
+<p>安装了依赖 cuda12.4 的 torch2.7.0</p>
+<p>至此，我们安装了 GPU 驱动（Version: 550.144.03）+ CUDA（Version: 12.4）+ Python(Version: 3.10.18) + Pytorch（Version: 2.6.0+cuda124）。</p>
+<h3 id="验证-GPU-是否可用">验证 GPU 是否可用</h3>
+<p>运行以下代码检查 PyTorch 能否调用 CUDA 访问 GPU</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt; (RL) python</span><br><span class="line">&gt;&gt;&gt; import torch</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.is_available())  # 检查 CUDA 是否可用（True 表示 GPU 可用）</span><br><span class="line">True</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.device_count())  # 显示可用 GPU 数量</span><br><span class="line">1</span><br><span class="line">&gt;&gt;&gt; print(torch.cuda.get_device_name(0))  # 输出第 1 块 GPU 的名称（如 &quot;NVIDIA RTX 3090&quot;）</span><br><span class="line">NVIDIA GeForce RTX 3060 Laptop GPU</span><br></pre></td></tr></table></figure>
+<h3 id="检查-CUDA-版本">检查 CUDA 版本</h3>
+<p>运行以下代码查看 PyTorch 支持到的 CUDA 版本：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; print(torch.version.cuda)  # 输出 PyTorch 使用的 CUDA 版本</span><br><span class="line">&gt;&gt;&gt; print(torch.version.cuda)</span><br><span class="line">12.4</span><br></pre></td></tr></table></figure>
+<h3 id="验证-cuDNN-是否可用">验证 cuDNN 是否可用</h3>
+<p>cuDNN（CUDA Deep Neural Network library）是深度学习加速库，专门用于优化 GPU 上的深度神经网络计算（如卷积、池化、LSTM 等），是 CUDA 生态的重要组成部分。记得以前安装的时候还需要手动从官网下载，版本对应也怪麻烦的，没想到现在官方在预编译的 PyTorch 二进制包（pip/conda 安装） 中直接集成了 对应版本的 cuDNN，太妙了。查了以下，应该是从 PyTorch 1.6 版本开始的。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; print(torch.backends.cudnn.version())  # 输出 cuDNN 版本</span><br><span class="line">90100</span><br><span class="line">print(torch.backends.cudnn.is_available())  # 检查 cuDNN 是否可用</span><br><span class="line">True</span><br></pre></td></tr></table></figure>
+<h3 id="运行一个小型-GPU-测试">运行一个小型 GPU 测试</h3>
+<p>最后，用以下脚本启用 cuDNN, 用 cuda 在 GPU 上跑个卷积层看看。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">import torch</span><br><span class="line"></span><br><span class="line"># 启用 cuDNN 加速</span><br><span class="line">torch.backends.cudnn.enabled = True</span><br><span class="line"></span><br><span class="line"># 构造一个卷积操作（会调用 cuDNN）</span><br><span class="line">input_data = torch.randn(1, 3, 32, 32).cuda()  # [batch, channel, height, width]</span><br><span class="line">conv_layer = torch.nn.Conv2d(3, 64, kernel_size=3).cuda()  # 输入通道3，输出通道64</span><br><span class="line">output = conv_layer(input_data)  # 此操作会调用 cuDNN</span><br><span class="line"></span><br><span class="line">print(output.shape)  # 输出形状 [1, 64, 30, 30]</span><br><span class="line"></span><br><span class="line">---------------------------------</span><br><span class="line">out: torch.Size([1, 64, 30, 30])</span><br></pre></td></tr></table></figure>
+<p>如果代码正常运行，说明 PyTorch + CUDA + cuDNN + GPU 全部可用。</p>
+]]></content>
+      <categories>
+        <category>Pytorch</category>
+        <category>tutorial</category>
+      </categories>
+      <tags>
+        <tag>Pytorch</tag>
+        <tag>Conda</tag>
+        <tag>DeepLearning</tag>
+        <tag>Linux</tag>
       </tags>
   </entry>
 </search>
